@@ -1,5 +1,5 @@
 import random
-from creatures import creatures_dict
+from .creatures import creatures_dict
 
 def calculate_type_multiplier(move_type, defender):
     multiplier = 1.0
@@ -174,6 +174,7 @@ There is no active hp or status for creatures.
 A crash will occur if a status check is performed on a creature with no status.
 The battle ends when one team has no more creatures.
 """
+"""
 team1 = []
 team2 = []
 for i in range(6):
@@ -183,8 +184,8 @@ print(team1) # for testing
 print(team2) # for testing
 
 terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
-
-while team1 and team2:
+"""
+"""while team1 and team2:
     attacker_name = random.choice(team1)
     defender_name = random.choice(team2)
     move_name = random.choice(creatures_dict[attacker_name]["moves"])["name"]
@@ -198,10 +199,10 @@ while team1 and team2:
     if creatures_dict[defender_name]["stats"]["hp"] == 0:
         team1.remove(defender_name)
         print(f"{defender_name} has fainted!")
-    print()
-print("Team1: " + str(team1))
+    print()"""
+"""print("Team1: " + str(team1))
 print("Team2: " + str(team2))
 if team1:
     print("Team 1 wins!")
 else:
-    print("Team 2 wins!")
+    print("Team 2 wins!")"""

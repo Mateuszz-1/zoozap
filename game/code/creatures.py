@@ -1,4 +1,4 @@
-from moves import moves_dict
+from .moves import moves_dict
 
 """
 This file contains all the creatures in the game. Each creature is a dictionary with the following keys:
