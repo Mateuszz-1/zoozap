@@ -31,19 +31,19 @@ all_moves = [
     {"name": "Aqua Tornado", "type": "water", "category": "special", "power": 110, "accuracy": 85},
 
     # Status Moves
-    {"name": "Inferno Trap", "type": "fire", "category": "status", "effect": "Burn"},
-    {"name": "Quake Tremors", "type": "earth", "category": "status", "effect": "Lower Speed"},
-    {"name": "Misty Veil", "type": "water", "category": "status", "effect": "Raise Special Defense"},
-    {"name": "Gusty Wind", "type": "air", "category": "status", "effect": "Confuse"},
-    {"name": "Static Charge", "type": "electric", "category": "status", "effect": "Paralyze"},
-    {"name": "Spore Cloud", "type": "grass", "category": "status", "effect": "Sleep"},
-    {"name": "Mirror Shine", "type": "psychic", "category": "status", "effect": "Reflect Damage"},
-    {"name": "Shadow Hold", "type": "dark", "category": "status", "effect": "Prevent Escape"},
-    {"name": "Frost Chill", "type": "ice", "category": "status", "effect": "Freeze"},
-    {"name": "Toxic Spikes", "type": "poison", "category": "status", "effect": "Poison"},
-    {"name": "Steel Wall", "type": "steel", "category": "status", "effect": "Raise Defense"},
-    {"name": "Fairy Dust", "type": "fairy", "category": "status", "effect": "Heal"},
-    {"name": "Stun Spore", "type": "grass", "category": "status", "effect": "Paralyze"}
+    {"name": "Inferno Trap", "type": "fire", "category": "status", "effect": "burn", "probability": 0.5},
+    {"name": "Quake Tremors", "type": "earth", "category": "status", "effect": "lower_spd", "probability": 1},
+    {"name": "Misty Veil", "type": "water", "category": "status", "effect": "raise_sp_def", "probability": 1},
+    {"name": "Gusty Wind", "type": "air", "category": "status", "effect": "confuse", "probability": 0.3},
+    {"name": "Static Charge", "type": "electric", "category": "status", "effect": "paralyse", "probability": 0.3},
+    {"name": "Spore Cloud", "type": "grass", "category": "status", "effect": "sleep", "probability": 0.75},
+    {"name": "Mirror Shine", "type": "psychic", "category": "status", "effect": "reflect_effect", "probability": 1},
+    {"name": "Shadow Hold", "type": "dark", "category": "status", "effect": "prevent_escape", "probability": 1},
+    {"name": "Frost Chill", "type": "ice", "category": "status", "effect": "freeze", "probability": 0.2},
+    {"name": "Toxic Spikes", "type": "poison", "category": "status", "effect": "poison_terrain", "probability": 1},
+    {"name": "Steel Wall", "type": "steel", "category": "status", "effect": "raise_def", "probability": 1},
+    {"name": "Fairy Dust", "type": "fairy", "category": "status", "effect": "heal", "probability": 1},
+    {"name": "Stun Spore", "type": "grass", "category": "status", "effect": "paralyse", "probability": 0.75},
 ]
 
 # Create a dictionary of all the moves

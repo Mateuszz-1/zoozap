@@ -30,8 +30,8 @@ def main():
         creature_name2 = random.choice(list(logic.creatures_dict.keys()))
         creature_data1 = logic.creatures_dict[creature_name1]
         creature_data2 = logic.creatures_dict[creature_name2]
-        team1.append({"creature": creature_data1, "stats": creature_data1["stats"], "status": None, "status_duration": None})
-        team2.append({"creature": creature_data2, "stats": creature_data2["stats"], "status": None, "status_duration": None})
+        team1.append({"creature": creature_data1, "stats": creature_data1["stats"], "status": [], "status_duration": []})
+        team2.append({"creature": creature_data2, "stats": creature_data2["stats"], "status": [], "status_duration": []})
     print(team1) # for testing
     print(team2) # for testing
     active_creature1 = team1[0]
@@ -48,6 +48,45 @@ def main():
             client2.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}\n".encode())
         else:
             client2.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}\n".encode())
+    client1.sendall("Your opponent's active creature is {active_creature2['creature']['name']}".encode())
+    client2.sendall("Your opponent's active creature is {active_creature1['creature']['name']}".encode())
+    client1.sendall("Would you like to [attack] or [switch]?".encode())
+    client2.sendall("Would you like to [attack] or [switch]?".encode())
+    player1_choice = client1.recv(1024).decode()
+    player2_choice = client2.recv(1024).decode()
+    if player1_choice == "attack":
+        client1.sendall("Which move would you like to use?".encode())
+        player1_move = client1.recv(1024).decode()
+    else:
+        client1.sendall("Which creature would you like to switch to?".encode())
+        client1.sendall("Your available creatures are:".encode())
+        for creature in team1:
+            client1.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}".encode())
+        player1_switch = client1.recv(1024).decode()
+        active_creature1 = team1[player1_switch]
+    if player2_choice == "attack":
+        client2.sendall("Which move would you like to use?".encode())
+        player2_move = client2.recv(1024).decode()
+    else:
+        client2.sendall("Which creature would you like to switch to?".encode())
+        client2.sendall("Your available creatures are:".encode())
+        for creature in team2:
+            client2.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}".encode())
+        player2_switch = client2.recv(1024).decode()
+        active_creature2 = team2[player2_switch]
+    if player1_choice == "attack" and player2_choice == "attack":
+        if active_creature1['stats']['spd'] >= active_creature2['stats']['spd']:
+            logic.apply_move(active_creature1, active_creature2, player1_move)
+            if active_creature2['stats']['hp'] == 0:
+                team2.remove(active_creature2)
+                client1.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
+                client2.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
+            else:
+                logic.apply_move(active_creature2, active_creature1, player2_move)
+                if active_creature1['stats']['hp'] == 0:
+                    team1.remove(active_creature1)
+                    client1.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
+                    client2.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
     while team1 and team2:
         pass
     if team1:

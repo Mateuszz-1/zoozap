@@ -24,12 +24,12 @@ ZooZap is currently implemented in Python, featuring command-line interface (CLI
 ## Status Conditions
 
 ZooZap incorporates various status conditions that can affect the outcome of battles. These conditions include:
-- **Burnt:** Attack stat is halved and 6.25% max health dealt as damage at the end of each turn.
-- **Paralysed:** 25% chance to not be able to move each turn & speed stat is lowered by 75%.
+- **Burnt:** Attack stat is halved and 6.25% max health dealt as damage at the end of each turn. Burn lasts 1-3 turns.
+- **Paralysed:** 25% chance to not be able to move each turn & speed stat is lowered by 75%. Paralysis has a 20% chance to end each turn.
 - **Sleeping:** A sleeping creature cannot move, sleep lasts 1-3 turns.
 - **Trapped:** The creature cannot be swapped out of active combat till it faints.
-- **Frozen:** A frozen creature cannot move. Freeze may 'randomly' end any turn.
-- **Confused:** A confused creature has a 50% chance to hurt itself instead of executing a move. Confusion lasts 1-4 turns.
+- **Frozen:** A frozen creature cannot move. Freeze has a 30% chance to end each turn.
+- **Confused:** A confused creature has a 50% chance to hurt itself instead of executing a move. Confusion lasts 1-3 turns.
 Understanding and utilizing these status conditions effectively can be key to mastering the game.
 
 ## License

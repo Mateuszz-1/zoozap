@@ -9,87 +9,94 @@ def calculate_type_multiplier(move_type, defender):
         multiplier *= 0.5  # Half damage for resistances
     return multiplier
 
-def status_moves_logic(attacker, defender, move_name, terrain_conditions):
-    if move_name == "Inferno Trap":
+def status_moves_logic(attacker, defender, move, terrain_conditions):
+    if move["effect"] == "burn":
         # Fire type creatures are immune to burn
         if "fire" in defender["type"]:
             return "no_effect"
-        # There is a 50% chance of applying burn
-        if random.random() <= 0.5:
+        # There is a move["probability"] chance of applying burn
+        if random.random() <= move["probability"]:
             # Assign burn as status so that the creature takes damage at the end of each turn
-            defender["status"] = "Burn"
-            # Burn deals 6.25% of the defender's max HP as damage at the end of each turn
-            damage = defender["stats"]["hp"] * 0.0625
-            defender["stats"]["hp"] = max(0, defender["stats"]["hp"] - damage)
+            defender["status"].append("Burn")
+            # Burn lasts for 3-6 turns
+            defender["status_duration"].append(random.randint(3, 6))
             # Burn halves the defender's Attack stat
             defender["stats"]["atk"] *= 0.5
         else:
             return "missed"
-    elif move_name == "Quake Tremors":
+    elif move["effect"] == "lower_spd":
         # Lower the defender's Speed stat by 17%
         defender["stats"]["spd"] *= 0.83
         return "success"
-    elif move_name == "Misty Veil":
-        # Raise the attacker's Special Defense stat by 20%
+    elif move["effect"] == "raise_sp_def":
+        # Raise the attacker's Special Defence stat by 20%
         attacker["stats"]["sp_def"] *= 1.2
         return "success"
-    elif move_name == "Gusty Wind":
-        # There is a 30% chance of confusing the defender
-        if random.random() <= 0.3:
+    elif move["effect"] == "confuse":
+        # There is a move["probability"] chance of confusing the defender
+        if random.random() <= move["probability"]:
             # Assign confusion as status so that the creature has a 50% chance of attacking itself each turn
-            defender["status"] = "Confused"
-            # Confusion lasts for 1-4 turns
-            defender["status_duration"] = random.randint(1, 4)
+            defender["status"].append("Confused")
+            # Confusion lasts for 1-3 turns
+            defender["status_duration"].append(random.randint(1, 3))
             return "success"
         else:
             return "missed"
-    elif move_name == "Static Charge":
+    elif move["effect"] == "paralyse":
         # Electric type creatures are immune to paralysis
         if "electric" in defender["type"]:
             return "no_effect"
-        # There is a 30% chance of paralyzing the defender
-        if random.random() <= 0.3:
-            # Assign paralysis as status so that the creature has a 25% chance of not being able to move each turn
-            defender["status"] = "Paralyzed"
-            # The Speed stat is reduced by 75% while paralyzed
+        # There is a move["probability"] chance of paralysing the defender
+        if random.random() <= move["probability"]:
+            # Assign paralysis as status so that the creature has a 20% chance of not being able to move each turn
+            defender["status"].append("Paralysed")
+            # Paralysis lasts for 100 turns - which is unlikely. This is because it has a 20% chance of ending each turn.
+            defender["status_duration"].append(100)
+            # The Speed stat is reduced by 75% while paralysed
             defender["stats"]["spd"] *= 0.25
             return "success"
         else:
             return "missed"
-    elif move_name == "Spore Cloud":
-        # There is a 75% chance of putting the defender to sleep
-        if random.random() <= 0.75:
+    elif move["effect"] == "sleep":
+        # There is a move["probability"] chance of putting the defender to sleep
+        if random.random() <= move["probability"]:
             # Assign sleep as status so that the creature cannot move
-            defender["status"] = "Sleep"
+            defender["status"].append("Sleep")
             # Sleep lasts for 1-3 turns
-            defender["status_duration"] = random.randint(1, 3)
+            defender["status_duration"].append(random.randint(1, 3))
             return "success"
         else:
             return "missed"
-    elif move_name == "Mirror Shine":
+    elif move["effect"] == "reflect_effect":
         # If the attacker has a status effect, give the attacker's status to the defender
-        if attacker["status"]:
-            defender["status"] = attacker["status"]
+        if attacker["status"] != []:
+            for status in attacker["status"]:
+                defender["status"].append(status)
+            for duration in attacker["status_duration"]:
+                defender["status_duration"].append(duration)
             # Reset the attacker's status
-            attacker["status"] = None
+            attacker["status"] = []
             return "success"
         # If the attacker has no status effect, the move has no effect
         else:
             return "no_effect"
-    elif move_name == "Shadow Hold":
+    elif move["effect"] == "prevent_escape":
         # Trap the defender permanently (this means no substitutions) until it faints
-        defender["status"] = "Trapped"
+        defender["status"].append("Trapped")
+        # Trap lasts for 100 turns - which is unlikely. This is because it should not end until the defender faints.
+        defender["status_duration"].append(100)
         return "success"
-    elif move_name == "Frost Chill":
-        # There is a 20% chance of freezing the defender
-        if random.random() <= 0.2:
+    elif move["effect"] == "freeze":
+        # There is a move["probability"] chance of freezing the defender
+        if random.random() <= move["probability"]:
             # Assign freeze as status so that the creature cannot move
-            defender["status"] = "Frozen"
-            # Freeze is a permanent condition that has a probability to end randomly each turn
+            defender["status"].append("Frozen")
+            # Freeze lasts for 100 turns - which is unlikely. This is because it has a 30% chance of ending each turn.
+            defender["status_duration"].append(100)
             return "success"
         else:
             return "missed"
-    elif move_name == "Toxic Spikes":
+    elif move["effect"] == "poison_terrain":
         # Toxic spikes can be applied twice, any use afterwards does nothing
         # Toxic spikes poison any creature that switches in on the defender's side
         if terrain_conditions["toxic_spikes"] == False:
@@ -99,29 +106,69 @@ def status_moves_logic(attacker, defender, move_name, terrain_conditions):
             # 2 layers start dealing 6.25% of the defender's max HP each turn but increase by 6.25% each turn
             terrain_conditions["super_toxic_spikes"] = True
         return "success"
-    elif move_name == "Steel Wall":
-        # Raise the attacker's Defense stat by 40%
+    elif move["effect"] == "raise_def":
+        # Raise the attacker's Defence stat by 40%
         attacker["stats"]["def"] *= 1.4
         return "success"
-    elif move_name == "Fairy Dust":
+    elif move["effect"] == "heal":
         # Heal the attacker by 50% of its max HP
         heal_amount = attacker["stats"]["hp"] * 0.5
         attacker["stats"]["hp"] += heal_amount
         return "success"
-    elif move_name == "Stun Spore":
-        # Electric type creatures are immune to paralysis
-        if "electric" in defender["type"]:
-            return "no_effect"
-        # There is a 75% chance of paralyzing the defender
-        if random.random() <= 0.75:
-            # Assign paralysis as status so that the creature has a 25% chance of not being able to move each turn
-            defender["status"] = "Paralyzed"
-            return "success"
-        else:
-            return "missed"
     else:
         return "error"
-            
+
+
+def trapped_check(creature):
+    if "Trapped" in creature["status"]:
+        return True
+    else:
+        return False
+
+def status_check(creature):
+    return_statement = []
+    for status in creature["status"]:
+        # Burn deals 6.25% of the creature's max HP as damage at the end of each turn
+        if status == "Burn":
+            max_health = creatures_dict[creature["name"]]["stats"]["hp"]
+            damage = max_health * 0.0625
+            creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
+            creature["status_duration"][creature["status"].index(status)] -= 1
+        # Confusion has a 50% chance of causing the creature to hurt itself
+        elif status == "Confused":
+            if random.random() <= 0.5:
+                damage = (creature["stats"]["atk"] / creature["stats"]["def"]) * 40
+                creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
+                creature["status_duration"][creature["status"].index(status)] -= 1
+                return_statement.append("no_atk")
+            else:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+        # Paralysis has a 20% chance of preventing the creature from moving
+        elif status == "Paralysed":
+            if random.random() <= 0.2:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+                return_statement.append("no_atk")
+            else:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+        # Sleep lasts for a certain number of turns
+        elif status == "Sleep":
+            creature["status_duration"][creature["status"].index(status)] -= 1
+            return_statement.append("no_atk")
+        # Freeze has a 30% chance of ending each turn
+        elif status == "Frozen":
+            if random.random() <= 0.3:
+                creature["status_duration"][creature["status"].index(status)] = 0
+            else:
+                return_statement.append("no_atk")
+        else:
+            return_statement.append("error")
+    # Remove status effects that have expired
+    for status in creature["status"]:
+        if creature["status_duration"][creature["status"].index(status)] == 0:
+            creature["status_duration"].remove(creature["status_duration"][creature["status"].index(status)])
+            creature["status"].remove(status)
+    return return_statement
+                
 
 def apply_move(attacker_name, defender_name, move_name, terrain_conditions):
     # Retrieves the attacker's data from the creatures dictionary using the attacker's name.
@@ -152,7 +199,7 @@ def apply_move(attacker_name, defender_name, move_name, terrain_conditions):
 
     # Applying Status Effects
     if move["category"] == "status":
-        status_success = status_moves_logic(attacker, defender, move_name, terrain_conditions)
+        status_success = status_moves_logic(attacker, defender, move, terrain_conditions)
         print(f"{attacker_name} used {move_name}!")
         if status_success == "success":
             print("It was successful!")
@@ -174,8 +221,8 @@ There is no active hp or status for creatures.
 A crash will occur if a status check is performed on a creature with no status.
 The battle ends when one team has no more creatures.
 """
-"""
-team1 = []
+
+"""team1 = []
 team2 = []
 for i in range(6):
     team1.append(random.choice(list(creatures_dict.keys())))
@@ -184,8 +231,8 @@ print(team1) # for testing
 print(team2) # for testing
 
 terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
-"""
-"""while team1 and team2:
+
+while team1 and team2:
     attacker_name = random.choice(team1)
     defender_name = random.choice(team2)
     move_name = random.choice(creatures_dict[attacker_name]["moves"])["name"]
@@ -199,8 +246,8 @@ terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
     if creatures_dict[defender_name]["stats"]["hp"] == 0:
         team1.remove(defender_name)
         print(f"{defender_name} has fainted!")
-    print()"""
-"""print("Team1: " + str(team1))
+    print()
+print("Team1: " + str(team1))
 print("Team2: " + str(team2))
 if team1:
     print("Team 1 wins!")
