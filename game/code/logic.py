@@ -3,16 +3,16 @@ from .creatures import creatures_dict
 
 def calculate_type_multiplier(move_type, defender):
     multiplier = 1.0
-    if move_type in defender["weakness"]:
+    if move_type in defender["creature"]["weakness"]:
         multiplier *= 2  # Double damage for weaknesses
-    if move_type in defender["resistance"]:
+    if move_type in defender["creature"]["resistance"]:
         multiplier *= 0.5  # Half damage for resistances
     return multiplier
 
 def status_moves_logic(attacker, defender, move, terrain_conditions):
     if move["effect"] == "burn":
         # Fire type creatures are immune to burn
-        if "fire" in defender["type"]:
+        if "fire" in defender["creature"]["type"]:
             return "no_effect"
         # There is a move["probability"] chance of applying burn
         if random.random() <= move["probability"]:
@@ -44,7 +44,7 @@ def status_moves_logic(attacker, defender, move, terrain_conditions):
             return "missed"
     elif move["effect"] == "paralyse":
         # Electric type creatures are immune to paralysis
-        if "electric" in defender["type"]:
+        if "electric" in defender["creature"]["type"]:
             return "no_effect"
         # There is a move["probability"] chance of paralysing the defender
         if random.random() <= move["probability"]:
@@ -125,82 +125,137 @@ def trapped_check(creature):
     else:
         return False
 
-def status_check(creature):
-    return_statement = []
+def can_act_check(creature):
+    return_statement = True
     for status in creature["status"]:
-        # Burn deals 6.25% of the creature's max HP as damage at the end of each turn
-        if status == "Burn":
-            max_health = creatures_dict[creature["name"]]["stats"]["hp"]
-            damage = max_health * 0.0625
-            creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
-            creature["status_duration"][creature["status"].index(status)] -= 1
         # Confusion has a 50% chance of causing the creature to hurt itself
-        elif status == "Confused":
+        if status == "Confused":
             if random.random() <= 0.5:
                 damage = (creature["stats"]["atk"] / creature["stats"]["def"]) * 40
                 creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
                 creature["status_duration"][creature["status"].index(status)] -= 1
-                return_statement.append("no_atk")
+                return_statement = False
             else:
                 creature["status_duration"][creature["status"].index(status)] -= 1
         # Paralysis has a 20% chance of preventing the creature from moving
         elif status == "Paralysed":
             if random.random() <= 0.2:
                 creature["status_duration"][creature["status"].index(status)] -= 1
-                return_statement.append("no_atk")
+                return_statement = False
             else:
                 creature["status_duration"][creature["status"].index(status)] -= 1
         # Sleep lasts for a certain number of turns
         elif status == "Sleep":
             creature["status_duration"][creature["status"].index(status)] -= 1
-            return_statement.append("no_atk")
+            return_statement = False
         # Freeze has a 30% chance of ending each turn
         elif status == "Frozen":
             if random.random() <= 0.3:
                 creature["status_duration"][creature["status"].index(status)] = 0
             else:
-                return_statement.append("no_atk")
+                return_statement = False
         else:
-            return_statement.append("error")
+            return_statement = None
     # Remove status effects that have expired
+    removed_status = []
     for status in creature["status"]:
         if creature["status_duration"][creature["status"].index(status)] == 0:
+            removed_status.append(status)
             creature["status_duration"].remove(creature["status_duration"][creature["status"].index(status)])
             creature["status"].remove(status)
-    return return_statement
-                
+    return {"return_statement": return_statement, "removed_status": removed_status}
 
-def apply_move(attacker_name, defender_name, move_name, terrain_conditions):
+def can_act_check(creature):
+    return_statement = True
+    for status in creature["status"]:
+        # Confusion has a 50% chance of causing the creature to hurt itself
+        if status == "Confused":
+            if random.random() <= 0.5:
+                damage = (creature["stats"]["atk"] / creature["stats"]["def"]) * 40
+                creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
+                creature["status_duration"][creature["status"].index(status)] -= 1
+                return_statement = False
+            else:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+        # Paralysis has a 20% chance of preventing the creature from moving
+        elif status == "Paralysed":
+            if random.random() <= 0.2:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+                return_statement = False
+            else:
+                creature["status_duration"][creature["status"].index(status)] -= 1
+        # Sleep lasts for a certain number of turns
+        elif status == "Sleep":
+            creature["status_duration"][creature["status"].index(status)] -= 1
+            return_statement = False
+        # Freeze has a 30% chance of ending each turn
+        elif status == "Frozen":
+            if random.random() <= 0.3:
+                creature["status_duration"][creature["status"].index(status)] = 0
+            else:
+                return_statement = False
+        else:
+            return_statement = None
+    # Remove status effects that have expired
+    removed_status = []
+    for status in creature["status"]:
+        if creature["status_duration"][creature["status"].index(status)] == 0:
+            removed_status.append(status)
+            creature["status_duration"].remove(creature["status_duration"][creature["status"].index(status)])
+            creature["status"].remove(status)
+    return {"return_statement": return_statement, "removed_status": removed_status}
+                
+def burn_check(creature):
+    damage_statement = ""
+    removed_status = False
+    for status in creature["status"]:
+    # Burn deals 6.25% of the creature's max HP as damage at the end of each turn
+        if status == "Burn":
+            max_health = creatures_dict[creature["name"]]["stats"]["hp"]
+            damage = int(max_health * 0.0625)
+            creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
+            damage_statement = f"{creature['name']} took {damage} damage from burn!"
+            creature["status_duration"][creature["status"].index(status)] -= 1
+            # Remove burn if it has expired
+            if creature["status_duration"][creature["status"].index(status)] == 0:
+                creature["status_duration"].remove(creature["status_duration"][creature["status"].index(status)])
+                creature["status"].remove(status)
+                removed_status = True
+    return {"damage_statement": damage_statement, "removed_status": removed_status}
+
+
+def apply_move(attacker, defender, move_name):
     # Retrieves the attacker's data from the creatures dictionary using the attacker's name.
-    attacker = creatures_dict[attacker_name]
+    #attacker = creatures_dict[attacker_name]
 
     # Retrieves the defender's data from the creatures dictionary using the defender's name.
-    defender = creatures_dict[defender_name]
+    #defender = creatures_dict[defender_name]
 
     # Retrieves the move object from the attacker's moves list using the move's name
-    move = next(move for move in attacker["moves"] if move["name"] == move_name)
+    move = next(move for move in attacker["creature"]["moves"] if move["name"] == move_name)
 
     # Calculates the effectiveness of the move based on the defender's type, weaknesses, and resistances.
     type_multiplier = calculate_type_multiplier(move["type"], defender)
 
     # Damage Calculation for damaging moves (physical or special)
     if move["category"] in ["physical", "special"]:
-        # If the move is physical, uses the attacker's Attack stat and defender's Defense stat in the calculation.
+        # If the move is physical, uses the attacker's Attack stat and defender's Defence stat in the calculation.
         if move["category"] == "physical":
-            damage = ((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier
-        else:  # If the move is special, uses the attacker's Special Attack stat and defender's Special Defense stat.
-            damage = ((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier
+            damage = int(((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier)
+        else:  # If the move is special, uses the attacker's Special Attack stat and defender's Special Defence stat.
+            damage = int(((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier)
         # Ensures that damage is at least 1 (no negative or zero damage)
         damage = max(1, damage)
         # Reduces the defender's HP by the calculated damage, but not below 0
         defender["stats"]["hp"] = max(0, defender["stats"]["hp"] - damage)
         # Prints a message indicating the move used and the damage dealt
-        print(f"{attacker_name} used {move_name}! It dealt {damage:.2f} damage to {defender_name}.")
+        print(f"{attacker['creature']['name']} used {move_name}! It dealt {damage:.2f} damage to {defender['creature']['name']}.")
 
     # Applying Status Effects
     if move["category"] == "status":
+        terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
         status_success = status_moves_logic(attacker, defender, move, terrain_conditions)
-        print(f"{attacker_name} used {move_name}!")
+        print(f"{attacker['creature']['name']} used {move_name}!")
         if status_success == "success":
             print("It was successful!")
         elif status_success == "missed":
@@ -210,46 +265,3 @@ def apply_move(attacker_name, defender_name, move_name, terrain_conditions):
         else:
             print("Something went wrong!")
 
-
-"""
-Initial proof of concept for base battle mechanics.
-Damage moves working, status moves not working (properly).
-Moves are applied by a random creature from each team.
-Random moves are chosen each turn.
-Speed stat is not taken into account.
-There is no active hp or status for creatures.
-A crash will occur if a status check is performed on a creature with no status.
-The battle ends when one team has no more creatures.
-"""
-
-"""team1 = []
-team2 = []
-for i in range(6):
-    team1.append(random.choice(list(creatures_dict.keys())))
-    team2.append(random.choice(list(creatures_dict.keys())))
-print(team1) # for testing
-print(team2) # for testing
-
-terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
-
-while team1 and team2:
-    attacker_name = random.choice(team1)
-    defender_name = random.choice(team2)
-    move_name = random.choice(creatures_dict[attacker_name]["moves"])["name"]
-    apply_move(attacker_name, defender_name, move_name, terrain_conditions)
-    if creatures_dict[defender_name]["stats"]["hp"] == 0:
-        team2.remove(defender_name)
-        print(f"{defender_name} has fainted!")
-    attacker_name, defender_name = defender_name, attacker_name
-    move_name = random.choice(creatures_dict[attacker_name]["moves"])["name"]
-    apply_move(attacker_name, defender_name, move_name, terrain_conditions)
-    if creatures_dict[defender_name]["stats"]["hp"] == 0:
-        team1.remove(defender_name)
-        print(f"{defender_name} has fainted!")
-    print()
-print("Team1: " + str(team1))
-print("Team2: " + str(team2))
-if team1:
-    print("Team 1 wins!")
-else:
-    print("Team 2 wins!")"""

@@ -6,9 +6,9 @@ name: The name of the creature
 stats: A dictionary of the creature's stats
     HP: The creature's health points
     ATK: The creature's attack
-    DEF: The creature's defense
+    DEF: The creature's defence
     SP_ATK: The creature's special attack
-    SP_DEF: The creature's special defense
+    SP_DEF: The creature's special defence
     SPD: The creature's speed
 type: A list of the creature's types
 weakness: A list of the creature's weaknesses
@@ -17,7 +17,7 @@ moves: A list of the creature's moves
 """
 creatures = [
     {
-        "name": "LEGENDARY1",
+        "name": "Magmoleo",
         "stats": {"hp": 90, "atk": 130, "def": 130, "sp_atk": 95, "sp_def": 85, "spd": 100},
         "type": ["fire", "earth"],
         "weakness": ["water", "air"],
@@ -25,7 +25,7 @@ creatures = [
         "moves": [moves_dict["Lava Plume"], moves_dict["Rock Throw"], moves_dict["Inferno Trap"]]
     },
     {
-        "name": "LEGENDARY2",
+        "name": "Voltseraph",
         "stats": {"hp": 85, "atk": 95, "def": 90, "sp_atk": 130, "sp_def": 100, "spd": 100},
         "type": ["air", "electric"],
         "weakness": ["earth", "fire"],
@@ -33,7 +33,7 @@ creatures = [
         "moves": [moves_dict["Storm Blast"], moves_dict["Electric Shock"], moves_dict["Gusty Wind"]]
     },
     {
-        "name": "MYTHICAL1",
+        "name": "Hydrospark",
         "stats": {"hp": 80, "atk": 110, "def": 80, "sp_atk": 115, "sp_def": 95, "spd": 120},
         "type": ["water", "electric"],
         "weakness": ["grass", "earth"],
@@ -41,7 +41,7 @@ creatures = [
         "moves": [moves_dict["Tsunami Wave"], moves_dict["Electric Shock"], moves_dict["Misty Veil"]]
     },
     {
-        "name": "MYTHICAL2",
+        "name": "Florafae",
         "stats": {"hp": 95, "atk": 100, "def": 95, "sp_atk": 100, "sp_def": 110, "spd": 100},
         "type": ["grass"],
         "weakness": ["fire", "air"],
