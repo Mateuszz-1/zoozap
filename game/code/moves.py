@@ -1,12 +1,13 @@
 
 """
 This file contains all the moves in the game. Each move is a dictionary with the following keys:
-name: The name of the move
-type: The type of the move
-category: The category of the move (special, physical, or status)
-power: The power of the move (if applicable)
-accuracy: The accuracy of the move (if applicable)
-effect: The effect of the move (if applicable)
+Name: The name of the move
+Type: The type of the move
+Category: The category of the move (special, physical, or status)
+Power: The power of the move (if applicable)
+Accuracy: The accuracy of the move (if applicable)
+Effect: The effect of the move (if applicable)
+Probability: The probability of the effect occurring (if applicable)
 """
 all_moves = [
     # Damaging Moves

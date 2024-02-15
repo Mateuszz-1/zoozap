@@ -49,7 +49,7 @@ creatures = [
         "moves": [moves_dict["Nature's Wrath"], moves_dict["Grass Knot"], moves_dict["Spore Cloud"]]
     },
     {
-        "name": "pLEGENDARY1",
+        "name": "Aerofern",
         "stats": {"hp": 95, "atk": 120, "def": 90, "sp_atk": 90, "sp_def": 85, "spd": 120},
         "type": ["air", "grass"],
         "weakness": ["fire", "earth"],
@@ -57,7 +57,7 @@ creatures = [
         "moves": [moves_dict["Gale Force"], moves_dict["Grass Knot"], moves_dict["Fairy Dust"]]
     },
     {
-        "name": "pLEGENDARY2",
+        "name": "Electerrane",
         "stats": {"hp": 100, "atk": 120, "def": 100, "sp_atk": 80, "sp_def": 100, "spd": 100},
         "type": ["electric", "earth"],
         "weakness": ["fire", "air"],
@@ -65,7 +65,7 @@ creatures = [
         "moves": [moves_dict["Thunder Roar"], moves_dict["Quake Tremors"], moves_dict["Static Charge"]]
     },
     {
-        "name": "pLEGENDARY3",
+        "name": "Blazewind",
         "stats": {"hp": 90, "atk": 95, "def": 85, "sp_atk": 120, "sp_def": 110, "spd": 100},
         "type": ["fire", "air"],
         "weakness": ["water", "electric"],
@@ -73,7 +73,7 @@ creatures = [
         "moves": [moves_dict["Flaming Vortex"], moves_dict["Air Cutter"], moves_dict["Mirror Shine"]]
     },
     {
-        "name": "pLEGENDARY4",
+        "name": "Mistraloon",
         "stats": {"hp": 85, "atk": 85, "def": 100, "sp_atk": 120, "sp_def": 110, "spd": 100},
         "type": ["water", "air"],
         "weakness": ["electric", "fire"],
@@ -81,7 +81,7 @@ creatures = [
         "moves": [moves_dict["Aqua Tornado"], moves_dict["Air Cutter"], moves_dict["Frost Chill"]]
     },
     {
-        "name": "REG1",
+        "name": "Blazetail",
         "stats": {"hp": 80, "atk": 100, "def": 80, "sp_atk": 100, "sp_def": 80, "spd": 100},
         "type": ["fire"],
         "weakness": ["water", "earth"],
@@ -89,7 +89,7 @@ creatures = [
         "moves": [moves_dict["Fireball"], moves_dict["Flame Burst"], moves_dict["Inferno Trap"]]
     },
     {
-        "name": "REG2",
+        "name": "Dirtle",
         "stats": {"hp": 100, "atk": 110, "def": 100, "sp_atk": 70, "sp_def": 80, "spd": 80},
         "type": ["earth"],
         "weakness": ["air", "grass"],
@@ -97,7 +97,7 @@ creatures = [
         "moves": [moves_dict["Rock Throw"], moves_dict["Earthquake"], moves_dict["Quake Tremors"]]
     },
     {
-        "name": "REG3",
+        "name": "Aquatapin",
         "stats": {"hp": 85, "atk": 70, "def": 95, "sp_atk": 100, "sp_def": 95, "spd": 95},
         "type": ["water"],
         "weakness": ["electric", "grass"],
@@ -105,7 +105,7 @@ creatures = [
         "moves": [moves_dict["Water Pulse"], moves_dict["Tsunami Wave"], moves_dict["Misty Veil"]]
     },
     {
-        "name": "REG4",
+        "name": "Claydive",
         "stats": {"hp": 100, "atk": 90, "def": 115, "sp_atk": 75, "sp_def": 90, "spd": 70},
         "type": ["water", "earth"],
         "weakness": ["electric", "grass"],
@@ -113,7 +113,7 @@ creatures = [
         "moves": [moves_dict["Water Pulse"], moves_dict["Rock Throw"], moves_dict["Misty Veil"]]
     },
     {
-        "name": "REG5",
+        "name": "Verdahog",
         "stats": {"hp": 95, "atk": 105, "def": 95, "sp_atk": 75, "sp_def": 85, "spd": 85},
         "type": ["grass", "earth"],
         "weakness": ["air", "fire"],
@@ -121,7 +121,7 @@ creatures = [
         "moves": [moves_dict["Grass Knot"], moves_dict["Earthquake"], moves_dict["Spore Cloud"]]
     },
     {
-        "name": "REG6",
+        "name": "Hydravine",
         "stats": {"hp": 80, "atk": 80, "def": 90, "sp_atk": 110, "sp_def": 90, "spd": 90},
         "type": ["water", "grass"],
         "weakness": ["electric", "air"],
@@ -129,7 +129,7 @@ creatures = [
         "moves": [moves_dict["Water Pulse"], moves_dict["Grass Knot"], moves_dict["Misty Veil"]]
     },
     {
-        "name": "REG7",
+        "name": "Pyrofern",
         "stats": {"hp": 85, "atk": 105, "def": 80, "sp_atk": 95, "sp_def": 85, "spd": 90},
         "type": ["fire", "grass"],
         "weakness": ["water", "air"],
@@ -137,7 +137,7 @@ creatures = [
         "moves": [moves_dict["Fireball"], moves_dict["Grass Knot"], moves_dict["Inferno Trap"]]
     },
     {
-        "name": "REG8",
+        "name": "Terrawisp",
         "stats": {"hp": 90, "atk": 100, "def": 100, "sp_atk": 80, "sp_def": 85, "spd": 85},
         "type": ["earth", "air"],
         "weakness": ["grass", "fire"],
@@ -145,7 +145,7 @@ creatures = [
         "moves": [moves_dict["Rock Throw"], moves_dict["Air Cutter"], moves_dict["Quake Tremors"]]
     },
     {
-        "name": "REG9",
+        "name": "Electroflora",
         "stats": {"hp": 80, "atk": 75, "def": 85, "sp_atk": 105, "sp_def": 100, "spd": 95},
         "type": ["grass", "electric"],
         "weakness": ["fire", "earth"],
@@ -153,7 +153,7 @@ creatures = [
         "moves": [moves_dict["Grass Knot"], moves_dict["Electric Shock"], moves_dict["Spore Cloud"]]
     },
     {
-        "name": "REG10",
+        "name": "Vaporflare",
         "stats": {"hp": 90, "atk": 90, "def": 90, "sp_atk": 90, "sp_def": 90, "spd": 90},
         "type": ["water", "fire"],
         "weakness": ["grass", "electric"],
@@ -161,7 +161,7 @@ creatures = [
         "moves": [moves_dict["Water Pulse"], moves_dict["Fireball"], moves_dict["Misty Veil"]]
     },
     {
-        "name": "REG11",
+        "name": "Emberrock",
         "stats": {"hp": 95, "atk": 100, "def": 90, "sp_atk": 85, "sp_def": 85, "spd": 85},
         "type": ["earth", "fire"],
         "weakness": ["water", "grass"],
@@ -169,7 +169,7 @@ creatures = [
         "moves": [moves_dict["Rock Throw"], moves_dict["Flame Burst"], moves_dict["Quake Tremors"]]
     },
     {
-        "name": "REG12",
+        "name": "Zapcloud",
         "stats": {"hp": 85, "atk": 85, "def": 85, "sp_atk": 95, "sp_def": 95, "spd": 95},
         "type": ["air", "electric"],
         "weakness": ["earth", "fire"],
@@ -177,7 +177,7 @@ creatures = [
         "moves": [moves_dict["Air Cutter"], moves_dict["Electric Shock"], moves_dict["Gusty Wind"]]
     },
     {
-        "name": "REG13",
+        "name": "Shockpup",
         "stats": {"hp": 80, "atk": 85, "def": 80, "sp_atk": 105, "sp_def": 100, "spd": 90},
         "type": ["electric"],
         "weakness": ["earth", "fire"],
@@ -185,7 +185,7 @@ creatures = [
         "moves": [moves_dict["Electric Shock"], moves_dict["Thunder Punch"], moves_dict["Static Charge"]]
     },
     {
-        "name": "REG14",
+        "name": "Dewleaf",
         "stats": {"hp": 90, "atk": 90, "def": 95, "sp_atk": 85, "sp_def": 90, "spd": 90},
         "type": ["grass", "water"],
         "weakness": ["fire", "electric"],
@@ -193,7 +193,7 @@ creatures = [
         "moves": [moves_dict["Grass Knot"], moves_dict["Water Pulse"], moves_dict["Spore Cloud"]]
     },
     {
-        "name": "REG15",
+        "name": "Skywhisker",
         "stats": {"hp": 85, "atk": 90, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 95},
         "type": ["air"],
         "weakness": ["electric", "fire"],
@@ -201,7 +201,7 @@ creatures = [
         "moves": [moves_dict["Air Cutter"], moves_dict["Gusty Wind"], moves_dict["Mirror Shine"]]
     },
     {
-        "name": "REG16",
+        "name": "Electroblaze",
         "stats": {"hp": 80, "atk": 100, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 90},
         "type": ["fire", "electric"],
         "weakness": ["water", "earth"],
