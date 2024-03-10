@@ -1,7 +1,28 @@
 import socket
+import msgpack
+import struct
 import random
-import json
 from code import logic
+
+
+def send_message(client, message, message_type):
+    if message_type == 'text':
+        # Encode the text message
+        encoded_message = message.encode()
+        prefix = b'T'
+    elif message_type == 'msgpack':
+        # Pack the message using MessagePack
+        encoded_message = msgpack.packb(message, use_bin_type=True)
+        prefix = b'M'
+    else:
+        raise ValueError("Invalid message type")
+    
+    # Add prefix and length onto message
+    message_length = len(encoded_message)
+    header = prefix + struct.pack(">I", message_length)
+    full_message = header + encoded_message
+    
+    client.sendall(full_message)
 
 def main():
     server_socket, client1, client2 = establish_connection()
@@ -13,10 +34,10 @@ def main():
         player1_choice = client1.recv(1024).decode()
         player2_choice = client2.recv(1024).decode()
         if logic.trapped_check(active_creature1):
-            client1.sendall("You are trapped and cannot switch out!".encode())
+            send_message(client1, "You are trapped and cannot switch out!", "text")
             player1_choice = "attack"
         if logic.trapped_check(active_creature2):
-            client2.sendall("You are trapped and cannot switch out!".encode())
+            send_message(client2, "You are trapped and cannot switch out!", "text")
             player2_choice = "attack"
 
         if player1_choice == "attack":
@@ -65,7 +86,7 @@ def establish_connection():
     # Accept Player 1
     client1, address1 = server_socket.accept()
     print(f"Player 1 connected from {address1}")
-    client1.sendall("Welcome Player 1, you are the first to join".encode())
+    send_message(client1, "Welcome Player 1, you are the first to join", "text")
 
     # Receive name from Player 1
     """player1_name = client1.recv(1024).decode()
@@ -74,7 +95,7 @@ def establish_connection():
     # Accept Player 2
     client2, address2 = server_socket.accept()
     print(f"Player 2 connected from {address2}")
-    client2.sendall(f"Welcome Player 2. Player 1 has already joined.".encode())
+    send_message(client2, "Welcome Player 2. Player 1 has already joined.", "text")
 
     return server_socket, client1, client2
 
@@ -99,29 +120,30 @@ def setup_teams():
     return team1, team2, active_creature1, active_creature2
 
 def attack_switch(client1, client2, active_creature1, active_creature2):
-    client1.sendall(f"Your active creature is {active_creature1['creature']['name']}. Your available moves are:\n".encode())
+    send_message(client1, f"Your active creature is {active_creature1['creature']['name']}. Your available moves are:", "text")
     for move in active_creature1["creature"]["moves"]:
         if move["category"] == "physical" or move["category"] == "special":
-            client1.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}\n".encode())
+            send_message(client1, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}", "text")
         else:
-            client1.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}\n".encode())
-    client2.sendall(f"Your active creature is {active_creature2['creature']['name']}. Your available moves are:\n".encode())
+            send_message(client1, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}", "text")
+    send_message(client2, f"Your active creature is {active_creature2['creature']['name']}. Your available moves are:", "text")
     for move in active_creature2["creature"]["moves"]:
         if move["category"] == "physical" or move["category"] == "special":
-            client2.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}\n".encode())
+            send_message(client2, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}", "text")
         else:
-            client2.sendall(f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}\n".encode())
-    attack_or_switch = json.dumps(["attack", "switch"])
-    client1.sendall(attack_or_switch.encode())
-    client2.sendall(attack_or_switch.encode())
-    client1.sendall(f"Your opponent's active creature is {active_creature2['creature']['name']}.\nWould you like to [attack] or [switch]?".encode())
-    client2.sendall(f"Your opponent's active creature is {active_creature1['creature']['name']}.\nWould you like to [attack] or [switch]?".encode())
+            send_message(client2, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}", "text")
+    attack_or_switch = ["attack", "switch"]
+    send_message(client1, attack_or_switch, "msgpack")
+    send_message(client2, attack_or_switch, "msgpack")
+    send_message(client1, f"Your opponent's active creature is {active_creature2['creature']['name']}.\nWould you like to [attack] or [switch]?", "text")
+    send_message(client2, f"Your opponent's active creature is {active_creature1['creature']['name']}.\nWould you like to [attack] or [switch]?", "text")
 
 def player1_move_choice(client1, active_creature1):
     player1_moves = get_moves(active_creature1)
-    serialised_player1_moves = json.dumps(player1_moves)
-    client1.sendall(serialised_player1_moves.encode())
-    client1.sendall("Which move would you like to use?".encode())
+    send_message(client1, player1_moves, "msgpack")
+    player1_moves_names = get_moves_names(active_creature1)
+    send_message(client1, player1_moves_names, "msgpack")
+    send_message(client1, "Which move would you like to use?", "text")
     player1_move = client1.recv(1024).decode()
     return player1_move
 
@@ -130,22 +152,25 @@ def player1_switch(team1, active_creature1, client1, client2):
         for creature in team1:
             if creature["creature"]["name"] == active_creature1["creature"]["name"]:
                 continue
-            client1.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n".encode())
-        client1.sendall("Which creature would you like to switch to?".encode())
+            send_message(client1, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
+        team1_creature_names = get_team_creature_names(team1)
+        send_message(client1, team1_creature_names, "msgpack")
+        send_message(client1, "Which creature would you like to switch to?", "text")
         player1_switch = client1.recv(1024).decode()
         for creature in team1:
             if creature["creature"]["name"] == player1_switch:
                 active_creature1 = creature
                 break
-        client1.sendall(f"You have switched to {active_creature1['creature']['name']}!".encode())
-        client2.sendall(f"Player1 switched to {active_creature1['creature']['name']}!".encode())
+        send_message(client1, f"You have switched to {active_creature1['creature']['name']}!", "text")
+        send_message(client2, f"Player1 switched to {active_creature1['creature']['name']}!", "text")
     return active_creature1
 
 def player2_move_choice(client2, active_creature2):
     player2_moves = get_moves(active_creature2)
-    serialised_player2_moves = json.dumps(player2_moves)
-    client2.sendall(serialised_player2_moves.encode())
-    client2.sendall("Which move would you like to use?".encode())
+    send_message(client2, player2_moves, "msgpack")
+    player2_moves_names = get_moves_names(active_creature2)
+    send_message(client2, player2_moves_names, "msgpack")
+    send_message(client2, "Which move would you like to use?", "text")
     player2_move = client2.recv(1024).decode()
     return player2_move
 
@@ -154,15 +179,17 @@ def player2_switch(team2, active_creature2, client1, client2):
         for creature in team2:
             if creature["creature"]["name"] == active_creature2["creature"]["name"]:
                 continue
-            client2.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n".encode())
-        client2.sendall("Which creature would you like to switch to?".encode())
+            send_message(client2, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
+        team2_creature_names = get_team_creature_names(team2)
+        send_message(client2, team2_creature_names, "msgpack")
+        send_message(client2, "Which creature would you like to switch to?", "text")
         player2_switch = client2.recv(1024).decode()
         for creature in team2:
             if creature["creature"]["name"] == player2_switch:
                 active_creature2 = creature
                 break
-        client1.sendall(f"Player2 has switched to {active_creature2['creature']['name']}!".encode())
-        client2.sendall(f"You have switched to {active_creature2['creature']['name']}!".encode())
+        send_message(client1, f"Player2 has switched to {active_creature2['creature']['name']}!", "text")
+        send_message(client2, f"You have switched to {active_creature2['creature']['name']}!", "text")
     return active_creature2
 
 def both_attack(active_creature1, active_creature2, player1_move, player2_move, client1, client2):
@@ -170,6 +197,8 @@ def both_attack(active_creature1, active_creature2, player1_move, player2_move, 
     player2_first = False
     player1_can_act = True
     player2_can_act = True
+    player1_can_act_check = {"return_statement": True, "removed_status": []}
+    player2_can_act_check = {"return_statement": True, "removed_status": []}
     random_turn = 0
     if active_creature1['stats']['spd'] > active_creature2['stats']['spd']:
         player1_first = True
@@ -180,40 +209,36 @@ def both_attack(active_creature1, active_creature2, player1_move, player2_move, 
     
     if ((player1_first == True) or (random_turn == 1)):
         player1_can_act_check = logic.can_act_check(active_creature1)
-        if player1_can_act_check['return_statement'] == False: # if the creature is unable to act
-            player1_can_act = False
+        player1_can_act = False if player1_can_act_check['return_statement'] == False else True # if the creature is unable to act
         if player1_can_act:
             logic.apply_move(active_creature1, active_creature2, player1_move)
         if active_creature2['stats']['hp'] == 0:
-            client1.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
-            client2.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
+            send_message(client1, f"{active_creature2['creature']['name']} has fainted!", "text")
+            send_message(client2, f"{active_creature2['creature']['name']} has fainted!", "text")
         else:
             player2_can_act_check = logic.can_act_check(active_creature2)
-            if player2_can_act_check['return_statement'] == False: # if the creature is unable to act
-                player2_can_act = False
+            player2_can_act = False if player2_can_act_check['return_statement'] == False else True # if the creature is unable to act
             if player2_can_act:
                 logic.apply_move(active_creature2, active_creature1, player2_move)
                 if active_creature1['stats']['hp'] == 0:
-                    client1.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
-                    client2.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
+                    send_message(client1, f"{active_creature1['creature']['name']} has fainted!", "text")
+                    send_message(client2, f"{active_creature1['creature']['name']} has fainted!", "text")
     elif ((player2_first == True) or (random_turn == 2)):
         player2_can_act_check = logic.can_act_check(active_creature2)
-        if player2_can_act_check['return_statement'] == False: # if the creature is unable to act
-            player2_can_act = False
+        player2_can_act = False if player2_can_act_check['return_statement'] == False else True # if the creature is unable to act
         if player2_can_act:
             logic.apply_move(active_creature2, active_creature1, player2_move)
         if active_creature1['stats']['hp'] == 0:
-            client1.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
-            client2.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
+            send_message(client1, f"{active_creature1['creature']['name']} has fainted!", "text")
+            send_message(client2, f"{active_creature1['creature']['name']} has fainted!", "text")
         else:
             player1_can_act_check = logic.can_act_check(active_creature1)
-            if player1_can_act_check['return_statement'] == False: # if the creature is unable to act
-                player1_can_act = False
+            player1_can_act = False if player1_can_act_check['return_statement'] == False else True # if the creature is unable to act
             if player1_can_act:
                 logic.apply_move(active_creature1, active_creature2, player1_move)
                 if active_creature2['stats']['hp'] == 0:
-                    client1.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
-                    client2.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
+                    send_message(client1, f"{active_creature2['creature']['name']} has fainted!", "text")
+                    send_message(client2, f"{active_creature2['creature']['name']} has fainted!", "text")
     return player1_can_act, player2_can_act, player1_can_act_check, player2_can_act_check
 
 def player1_attack(active_creature1, active_creature2, player1_move, client1, client2):
@@ -224,8 +249,8 @@ def player1_attack(active_creature1, active_creature2, player1_move, client1, cl
     if player1_can_act:
         logic.apply_move(active_creature1, active_creature2, player1_move)
     if active_creature2['stats']['hp'] == 0:
-        client1.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
-        client2.sendall(f"{active_creature2['creature']['name']} has fainted!".encode())
+        send_message(client1, f"{active_creature2['creature']['name']} has fainted!", "text")
+        send_message(client2, f"{active_creature2['creature']['name']} has fainted!", "text")
     return player1_can_act, player1_can_act_check
 
 def player2_attack(active_creature1, active_creature2, player2_move, client1, client2):
@@ -236,51 +261,51 @@ def player2_attack(active_creature1, active_creature2, player2_move, client1, cl
     if player2_can_act:
         logic.apply_move(active_creature2, active_creature1, player2_move)
     if active_creature1['stats']['hp'] == 0:
-        client1.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
-        client2.sendall(f"{active_creature1['creature']['name']} has fainted!".encode())
+        send_message(client1, f"{active_creature1['creature']['name']} has fainted!", "text")
+        send_message(client2, f"{active_creature1['creature']['name']} has fainted!", "text")
     return player2_can_act, player2_can_act_check
 
 def did_creatures_act(player1_can_act, player2_can_act, client1, client2):
     if player1_can_act is not None and player2_can_act is not None:
         if not player1_can_act and not player2_can_act:
-            client1.sendall("Both creatures are unable to act!".encode())
-            client2.sendall("Both creatures are unable to act!".encode())
+            send_message(client1, "Both creatures are unable to act!", "text")
+            send_message(client2, "Both creatures are unable to act!", "text")
     elif player1_can_act is not None:
         if not player1_can_act:
-            client1.sendall("Your creature was unable to act!".encode())
-            client2.sendall("Your opponent's creature was unable to act!".encode())
+            send_message(client1, "Your creature was unable to act!", "text")
+            send_message(client2, "Your opponent's creature was unable to act!", "text")
     elif player2_can_act is not None:
         if not player2_can_act:
-            client1.sendall("Your opponent's creature was unable to act!".encode())
-            client2.sendall("Your creature was unable to act!".encode())
+            send_message(client1, "Your opponent's creature was unable to act!", "text")
+            send_message(client2, "Your creature was unable to act!", "text")
 
 def did_creatures_burn(active_creature1, active_creature2, client1, client2):
     if active_creature1['stats']['hp'] != 0:
         player1_burn_check = logic.burn_check(active_creature1)
         if player1_burn_check['damage_statement'] != "":
-            client1.sendall(f"Player1's {player1_burn_check['damage_statement']}".encode())
-            client2.sendall(f"Player1's {player1_burn_check['damage_statement']}".encode())
+            send_message(client1, f"Player1's {player1_burn_check['damage_statement']}", "text")
+            send_message(client2, f"Player1's {player1_burn_check['damage_statement']}", "text")
             if active_creature1['stats']['hp'] == 0:
-                client1.sendall(f"Player1's {active_creature1['creature']['name']} has fainted!".encode())
-                client2.sendall(f"Player1's {active_creature1['creature']['name']} has fainted!".encode())
+                send_message(client1, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
+                send_message(client2, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
     if active_creature2['stats']['hp'] != 0:
         player2_burn_check = logic.burn_check(active_creature2)
         if player2_burn_check['damage_statement'] != "":
-            client1.sendall(f"Player2's {player2_burn_check['damage_statement']}".encode())
-            client2.sendall(f"Player2's {player2_burn_check['damage_statement']}".encode())
+            send_message(client1, f"Player2's {player2_burn_check['damage_statement']}", "text")
+            send_message(client2, f"Player2's {player2_burn_check['damage_statement']}", "text")
             if active_creature2['stats']['hp'] == 0:
-                client1.sendall(f"Player2's {active_creature2['creature']['name']} has fainted!".encode())
-                client2.sendall(f"Player2's {active_creature2['creature']['name']} has fainted!".encode())
+                send_message(client1, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
+                send_message(client2, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
 
 def any_status_removed(player1_can_act_check, player2_can_act_check, active_creature1, active_creature2, client1, client2):
     if player1_can_act_check is not None:
         if player1_can_act_check['removed_status'] != [] and active_creature1['stats']['hp'] != 0:
-            client1.sendall(f"{player1_can_act_check['removed_status']} has been cured from Player1's {active_creature1['creature']['name']}!".encode())
-            client2.sendall(f"{player1_can_act_check['removed_status']} has been cured from Player1's {active_creature1['creature']['name']}!".encode())
+            send_message(client1, f"{player1_can_act_check['removed_status']} has been cured from Player1's {active_creature1['creature']['name']}!", "text")
+            send_message(client2, f"{player1_can_act_check['removed_status']} has been cured from Player1's {active_creature1['creature']['name']}!", "text")
     if player2_can_act_check is not None:
         if player2_can_act_check['removed_status'] != [] and active_creature2['stats']['hp'] != 0:
-            client1.sendall(f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!".encode())
-            client2.sendall(f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!".encode())
+            send_message(client1, f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!", "text")
+            send_message(client2, f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!", "text")
 
 def switch_fainted(active_creature1, active_creature2, team1, team2, client1, client2):
     if active_creature1['stats']['hp'] == 0:
@@ -288,29 +313,33 @@ def switch_fainted(active_creature1, active_creature2, team1, team2, client1, cl
         active_creature1 = None
         if team1:
             for creature in team1:
-                client1.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n".encode())
-            client1.sendall("Which creature would you like to switch to?".encode())
+                send_message(client1, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
+            team1_creature_names = get_team_creature_names(team1)
+            send_message(client1, team1_creature_names, "msgpack")
+            send_message(client1, "Which creature would you like to switch to?", "text")
             player1_switch = client1.recv(1024).decode()
             for creature in team1:
                 if creature["creature"]["name"] == player1_switch:
                     active_creature1 = creature
                     break
-            client1.sendall(f"You have switched to {active_creature1['creature']['name']}!".encode())
-            client2.sendall(f"Player1 switched to {active_creature1['creature']['name']}!".encode())
+            send_message(client1, f"You have switched to {active_creature1['creature']['name']}!", "text")
+            send_message(client2, f"Player1 has switched to {active_creature1['creature']['name']}!", "text")
     if active_creature2['stats']['hp'] == 0:
         team2.remove(active_creature2)
         active_creature2 = None
         if team2:
             for creature in team2:
-                client2.sendall(f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n".encode())
-            client2.sendall("Which creature would you like to switch to?".encode())
+                send_message(client2, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
+            team2_creature_names = get_team_creature_names(team2)
+            send_message(client2, team2_creature_names, "msgpack")
+            send_message(client2, "Which creature would you like to switch to?", "text")
             player2_switch = client2.recv(1024).decode()
             for creature in team2:
                 if creature["creature"]["name"] == player2_switch:
                     active_creature2 = creature
                     break
-            client1.sendall(f"Player2 has switched to {active_creature2['creature']['name']}!".encode())
-            client2.sendall(f"You have switched to {active_creature2['creature']['name']}!".encode())
+            send_message(client1, f"Player2 has switched to {active_creature2['creature']['name']}!", "text")
+            send_message(client2, f"You have switched to {active_creature2['creature']['name']}!", "text")
     return active_creature1, active_creature2
 
 def close_game(client1, client2, server_socket):
@@ -324,8 +353,17 @@ def close_game(client1, client2, server_socket):
 def get_moves(creature):
     return creature["creature"]["moves"]
 
-def get_team(team):
-    return team
+def get_moves_names(creature):
+    moves = []
+    for move in creature["creature"]["moves"]:
+        moves.append(move["name"])
+    return moves
+
+def get_team_creature_names(team):
+    team_creature_names = []
+    for creature in team:
+        team_creature_names.append(creature["creature"]["name"])
+    return team_creature_names
 
 if __name__ == "__main__":
     main()
