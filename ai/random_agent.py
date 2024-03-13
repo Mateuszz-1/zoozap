@@ -18,19 +18,16 @@ def main():
             break
 
         if message_type == b'T':  # Text message
-            print("Text message received:")
-            print(message.decode())
+            print("(T) Received: ", message.decode())
             message = message.decode() # Decode the message from bytes to string
             # Check if the message is a prompt
             if message.strip().endswith('?'):
                 response = str(random.choice(options)) if options else print("No options available") # Pick a random option
                 client_socket.sendall(response.encode())  # Send the response back to the server
-                print("Response sent:", response)
+                print("Response Sent:", response)
         elif message_type == b'M':  # MessagePack message
-            print("MessagePack message received:")
-
             data = msgpack.unpackb(message, raw=False) # Unpack the messagepack data
-            print(data)
+            print("(M) Received: ", data)
             options = data
         else:
             print("Unknown Message Received:")
