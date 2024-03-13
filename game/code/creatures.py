@@ -18,7 +18,7 @@ moves: A list of the creature's moves
 creatures = [
     {
         "name": "Magmoleo",
-        "stats": {"hp": 90, "atk": 130, "def": 130, "sp_atk": 95, "sp_def": 85, "spd": 100},
+        "stats": {"hp": 360, "atk": 130, "def": 130, "sp_atk": 95, "sp_def": 85, "spd": 100},
         "type": ["fire", "earth"],
         "weakness": ["water", "air"],
         "resistance": ["grass", "electric"],
@@ -26,7 +26,7 @@ creatures = [
     },
     {
         "name": "Voltseraph",
-        "stats": {"hp": 85, "atk": 95, "def": 90, "sp_atk": 130, "sp_def": 100, "spd": 100},
+        "stats": {"hp": 340, "atk": 95, "def": 90, "sp_atk": 130, "sp_def": 100, "spd": 100},
         "type": ["air", "electric"],
         "weakness": ["earth", "fire"],
         "resistance": ["water", "grass"],
@@ -34,7 +34,7 @@ creatures = [
     },
     {
         "name": "Hydrospark",
-        "stats": {"hp": 80, "atk": 110, "def": 80, "sp_atk": 115, "sp_def": 95, "spd": 120},
+        "stats": {"hp": 320, "atk": 110, "def": 80, "sp_atk": 115, "sp_def": 95, "spd": 120},
         "type": ["water", "electric"],
         "weakness": ["grass", "earth"],
         "resistance": ["fire", "air"],
@@ -42,7 +42,7 @@ creatures = [
     },
     {
         "name": "Florafae",
-        "stats": {"hp": 95, "atk": 100, "def": 95, "sp_atk": 100, "sp_def": 110, "spd": 100},
+        "stats": {"hp": 380, "atk": 100, "def": 95, "sp_atk": 100, "sp_def": 110, "spd": 100},
         "type": ["grass"],
         "weakness": ["fire", "air"],
         "resistance": ["water", "electric"],
@@ -50,7 +50,7 @@ creatures = [
     },
     {
         "name": "Aerofern",
-        "stats": {"hp": 95, "atk": 120, "def": 90, "sp_atk": 90, "sp_def": 85, "spd": 120},
+        "stats": {"hp": 380, "atk": 120, "def": 90, "sp_atk": 90, "sp_def": 85, "spd": 120},
         "type": ["air", "grass"],
         "weakness": ["fire", "earth"],
         "resistance": ["water", "electric"],
@@ -58,7 +58,7 @@ creatures = [
     },
     {
         "name": "Electerrane",
-        "stats": {"hp": 100, "atk": 120, "def": 100, "sp_atk": 80, "sp_def": 100, "spd": 100},
+        "stats": {"hp": 400, "atk": 120, "def": 100, "sp_atk": 80, "sp_def": 100, "spd": 100},
         "type": ["electric", "earth"],
         "weakness": ["fire", "air"],
         "resistance": ["water", "grass"],
@@ -66,7 +66,7 @@ creatures = [
     },
     {
         "name": "Blazewind",
-        "stats": {"hp": 90, "atk": 95, "def": 85, "sp_atk": 120, "sp_def": 110, "spd": 100},
+        "stats": {"hp": 360, "atk": 95, "def": 85, "sp_atk": 120, "sp_def": 110, "spd": 100},
         "type": ["fire", "air"],
         "weakness": ["water", "electric"],
         "resistance": ["grass", "earth"],
@@ -74,7 +74,7 @@ creatures = [
     },
     {
         "name": "Mistraloon",
-        "stats": {"hp": 85, "atk": 85, "def": 100, "sp_atk": 120, "sp_def": 110, "spd": 100},
+        "stats": {"hp": 340, "atk": 85, "def": 100, "sp_atk": 120, "sp_def": 110, "spd": 100},
         "type": ["water", "air"],
         "weakness": ["electric", "fire"],
         "resistance": ["earth", "grass"],
@@ -82,7 +82,7 @@ creatures = [
     },
     {
         "name": "Blazetail",
-        "stats": {"hp": 80, "atk": 100, "def": 80, "sp_atk": 100, "sp_def": 80, "spd": 100},
+        "stats": {"hp": 320, "atk": 100, "def": 80, "sp_atk": 100, "sp_def": 80, "spd": 100},
         "type": ["fire"],
         "weakness": ["water", "earth"],
         "resistance": ["grass", "electric"],
@@ -90,7 +90,7 @@ creatures = [
     },
     {
         "name": "Dirtle",
-        "stats": {"hp": 100, "atk": 110, "def": 100, "sp_atk": 70, "sp_def": 80, "spd": 80},
+        "stats": {"hp": 400, "atk": 110, "def": 100, "sp_atk": 70, "sp_def": 80, "spd": 80},
         "type": ["earth"],
         "weakness": ["air", "grass"],
         "resistance": ["electric", "fire"],
@@ -98,7 +98,7 @@ creatures = [
     },
     {
         "name": "Aquatapin",
-        "stats": {"hp": 85, "atk": 70, "def": 95, "sp_atk": 100, "sp_def": 95, "spd": 95},
+        "stats": {"hp": 340, "atk": 70, "def": 95, "sp_atk": 100, "sp_def": 95, "spd": 95},
         "type": ["water"],
         "weakness": ["electric", "grass"],
         "resistance": ["fire", "earth"],
@@ -106,7 +106,7 @@ creatures = [
     },
     {
         "name": "Claydive",
-        "stats": {"hp": 100, "atk": 90, "def": 115, "sp_atk": 75, "sp_def": 90, "spd": 70},
+        "stats": {"hp": 400, "atk": 90, "def": 115, "sp_atk": 75, "sp_def": 90, "spd": 70},
         "type": ["water", "earth"],
         "weakness": ["electric", "grass"],
         "resistance": ["fire", "air"],
@@ -114,7 +114,7 @@ creatures = [
     },
     {
         "name": "Verdahog",
-        "stats": {"hp": 95, "atk": 105, "def": 95, "sp_atk": 75, "sp_def": 85, "spd": 85},
+        "stats": {"hp": 380, "atk": 105, "def": 95, "sp_atk": 75, "sp_def": 85, "spd": 85},
         "type": ["grass", "earth"],
         "weakness": ["air", "fire"],
         "resistance": ["water", "electric"],
@@ -122,7 +122,7 @@ creatures = [
     },
     {
         "name": "Hydravine",
-        "stats": {"hp": 80, "atk": 80, "def": 90, "sp_atk": 110, "sp_def": 90, "spd": 90},
+        "stats": {"hp": 320, "atk": 80, "def": 90, "sp_atk": 110, "sp_def": 90, "spd": 90},
         "type": ["water", "grass"],
         "weakness": ["electric", "air"],
         "resistance": ["fire", "earth"],
@@ -130,7 +130,7 @@ creatures = [
     },
     {
         "name": "Pyrofern",
-        "stats": {"hp": 85, "atk": 105, "def": 80, "sp_atk": 95, "sp_def": 85, "spd": 90},
+        "stats": {"hp": 340, "atk": 105, "def": 80, "sp_atk": 95, "sp_def": 85, "spd": 90},
         "type": ["fire", "grass"],
         "weakness": ["water", "air"],
         "resistance": ["earth", "electric"],
@@ -138,7 +138,7 @@ creatures = [
     },
     {
         "name": "Terrawisp",
-        "stats": {"hp": 90, "atk": 100, "def": 100, "sp_atk": 80, "sp_def": 85, "spd": 85},
+        "stats": {"hp": 360, "atk": 100, "def": 100, "sp_atk": 80, "sp_def": 85, "spd": 85},
         "type": ["earth", "air"],
         "weakness": ["grass", "fire"],
         "resistance": ["water", "electric"],
@@ -146,7 +146,7 @@ creatures = [
     },
     {
         "name": "Electroflora",
-        "stats": {"hp": 80, "atk": 75, "def": 85, "sp_atk": 105, "sp_def": 100, "spd": 95},
+        "stats": {"hp": 320, "atk": 75, "def": 85, "sp_atk": 105, "sp_def": 100, "spd": 95},
         "type": ["grass", "electric"],
         "weakness": ["fire", "earth"],
         "resistance": ["water", "air"],
@@ -154,7 +154,7 @@ creatures = [
     },
     {
         "name": "Vaporflare",
-        "stats": {"hp": 90, "atk": 90, "def": 90, "sp_atk": 90, "sp_def": 90, "spd": 90},
+        "stats": {"hp": 360, "atk": 90, "def": 90, "sp_atk": 90, "sp_def": 90, "spd": 90},
         "type": ["water", "fire"],
         "weakness": ["grass", "electric"],
         "resistance": ["earth", "air"],
@@ -162,7 +162,7 @@ creatures = [
     },
     {
         "name": "Emberrock",
-        "stats": {"hp": 95, "atk": 100, "def": 90, "sp_atk": 85, "sp_def": 85, "spd": 85},
+        "stats": {"hp": 380, "atk": 100, "def": 90, "sp_atk": 85, "sp_def": 85, "spd": 85},
         "type": ["earth", "fire"],
         "weakness": ["water", "grass"],
         "resistance": ["air", "electric"],
@@ -170,7 +170,7 @@ creatures = [
     },
     {
         "name": "Zapcloud",
-        "stats": {"hp": 85, "atk": 85, "def": 85, "sp_atk": 95, "sp_def": 95, "spd": 95},
+        "stats": {"hp": 340, "atk": 85, "def": 85, "sp_atk": 95, "sp_def": 95, "spd": 95},
         "type": ["air", "electric"],
         "weakness": ["earth", "fire"],
         "resistance": ["water", "grass"],
@@ -178,7 +178,7 @@ creatures = [
     },
     {
         "name": "Shockpup",
-        "stats": {"hp": 80, "atk": 85, "def": 80, "sp_atk": 105, "sp_def": 100, "spd": 90},
+        "stats": {"hp": 320, "atk": 85, "def": 80, "sp_atk": 105, "sp_def": 100, "spd": 90},
         "type": ["electric"],
         "weakness": ["earth", "fire"],
         "resistance": ["water", "air"],
@@ -186,7 +186,7 @@ creatures = [
     },
     {
         "name": "Dewleaf",
-        "stats": {"hp": 90, "atk": 90, "def": 95, "sp_atk": 85, "sp_def": 90, "spd": 90},
+        "stats": {"hp": 360, "atk": 90, "def": 95, "sp_atk": 85, "sp_def": 90, "spd": 90},
         "type": ["grass", "water"],
         "weakness": ["fire", "electric"],
         "resistance": ["earth", "air"],
@@ -194,7 +194,7 @@ creatures = [
     },
     {
         "name": "Skywhisker",
-        "stats": {"hp": 85, "atk": 90, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 95},
+        "stats": {"hp": 340, "atk": 90, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 95},
         "type": ["air"],
         "weakness": ["electric", "fire"],
         "resistance": ["earth", "grass"],
@@ -202,7 +202,7 @@ creatures = [
     },
     {
         "name": "Electroblaze",
-        "stats": {"hp": 80, "atk": 100, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 90},
+        "stats": {"hp": 320, "atk": 100, "def": 85, "sp_atk": 95, "sp_def": 90, "spd": 90},
         "type": ["fire", "electric"],
         "weakness": ["water", "earth"],
         "resistance": ["air", "grass"],

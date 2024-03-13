@@ -11,25 +11,25 @@ Probability: The probability of the effect occurring (if applicable)
 """
 all_moves = [
     # Damaging Moves
-    {"name": "Fireball", "type": "fire", "category": "special", "power": 80, "accuracy": 100},
-    {"name": "Rock Throw", "type": "earth", "category": "physical", "power": 75, "accuracy": 95},
-    {"name": "Water Pulse", "type": "water", "category": "special", "power": 80, "accuracy": 100},
-    {"name": "Air Cutter", "type": "air", "category": "special", "power": 75, "accuracy": 95},
-    {"name": "Electric Shock", "type": "electric", "category": "physical", "power": 80, "accuracy": 100},
-    {"name": "Grass Knot", "type": "grass", "category": "special", "power": 70, "accuracy": 100},
-    {"name": "Earthquake", "type": "earth", "category": "physical", "power": 100, "accuracy": 100},
-    {"name": "Thunder Punch", "type": "electric", "category": "physical", "power": 75, "accuracy": 100},
-    {"name": "Flame Burst", "type": "fire", "category": "special", "power": 70, "accuracy": 100},
+    {"name": "Fireball", "type": "fire", "category": "special", "power": 80, "accuracy": 0.95},
+    {"name": "Rock Throw", "type": "earth", "category": "physical", "power": 75, "accuracy": 1},
+    {"name": "Water Pulse", "type": "water", "category": "special", "power": 80, "accuracy": 0.95},
+    {"name": "Air Cutter", "type": "air", "category": "special", "power": 75, "accuracy": 1},
+    {"name": "Electric Shock", "type": "electric", "category": "physical", "power": 80, "accuracy": 0.95},
+    {"name": "Grass Knot", "type": "grass", "category": "special", "power": 70, "accuracy": 1},
+    {"name": "Earthquake", "type": "earth", "category": "physical", "power": 100, "accuracy": 0.7},
+    {"name": "Thunder Punch", "type": "electric", "category": "physical", "power": 75, "accuracy": 1},
+    {"name": "Flame Burst", "type": "fire", "category": "special", "power": 70, "accuracy": 1},
 
     # Unique Moves for Legendary/Mythical/Pseudo-Legendary Creatures
-    {"name": "Lava Plume", "type": "fire", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Storm Blast", "type": "air", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Tsunami Wave", "type": "water", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Nature's Wrath", "type": "grass", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Gale Force", "type": "air", "category": "physical", "power": 110, "accuracy": 85},
-    {"name": "Thunder Roar", "type": "electric", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Flaming Vortex", "type": "fire", "category": "special", "power": 110, "accuracy": 85},
-    {"name": "Aqua Tornado", "type": "water", "category": "special", "power": 110, "accuracy": 85},
+    {"name": "Lava Plume", "type": "fire", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Storm Blast", "type": "air", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Tsunami Wave", "type": "water", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Nature's Wrath", "type": "grass", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Gale Force", "type": "air", "category": "physical", "power": 100, "accuracy": 0.85},
+    {"name": "Thunder Roar", "type": "electric", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Flaming Vortex", "type": "fire", "category": "special", "power": 100, "accuracy": 0.85},
+    {"name": "Aqua Tornado", "type": "water", "category": "special", "power": 100, "accuracy": 0.85},
 
     # Status Moves
     {"name": "Inferno Trap", "type": "fire", "category": "status", "effect": "burn", "probability": 0.5},

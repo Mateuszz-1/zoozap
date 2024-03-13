@@ -22,15 +22,18 @@ def status_moves_logic(attacker, defender, move, terrain_conditions):
             defender["status_duration"].append(random.randint(3, 6))
             # Burn halves the defender's Attack stat
             defender["stats"]["atk"] *= 0.5
+            defender["stats"]["atk"] = int(defender["stats"]["atk"])
         else:
             return "missed"
     elif move["effect"] == "lower_spd":
         # Lower the defender's Speed stat by 17%
         defender["stats"]["spd"] *= 0.83
+        defender["stats"]["spd"] = int(defender["stats"]["spd"])
         return "success"
     elif move["effect"] == "raise_sp_def":
         # Raise the attacker's Special Defence stat by 20%
         attacker["stats"]["sp_def"] *= 1.2
+        attacker["stats"]["sp_def"] = int(attacker["stats"]["sp_def"])
         return "success"
     elif move["effect"] == "confuse":
         # There is a move["probability"] chance of confusing the defender
@@ -54,6 +57,7 @@ def status_moves_logic(attacker, defender, move, terrain_conditions):
             defender["status_duration"].append(100)
             # The Speed stat is reduced by 75% while paralysed
             defender["stats"]["spd"] *= 0.25
+            defender["stats"]["spd"] = int(defender["stats"]["spd"])
             return "success"
         else:
             return "missed"
@@ -109,11 +113,14 @@ def status_moves_logic(attacker, defender, move, terrain_conditions):
     elif move["effect"] == "raise_def":
         # Raise the attacker's Defence stat by 40%
         attacker["stats"]["def"] *= 1.4
+        attacker["stats"]["def"] = int(attacker["stats"]["def"])
         return "success"
     elif move["effect"] == "heal":
         # Heal the attacker by 50% of its max HP
         heal_amount = attacker["stats"]["hp"] * 0.5
-        attacker["stats"]["hp"] += heal_amount
+        attacker["stats"]["hp"] += int(heal_amount)
+        if attacker["stats"]["hp"] >= creatures_dict[attacker["creature"]["name"]]["stats"]["hp"]:
+            attacker["stats"]["hp"] = creatures_dict[attacker["creature"]["name"]]["stats"]["hp"]
         return "success"
     else:
         return "error"
@@ -170,10 +177,10 @@ def burn_check(creature):
     for status in creature["status"]:
     # Burn deals 6.25% of the creature's max HP as damage at the end of each turn
         if status == "Burn":
-            max_health = creatures_dict[creature["creature_data"]["name"]]["stats"]["hp"]
+            max_health = creatures_dict[creature["creature"]["name"]]["stats"]["hp"]
             damage = int(max_health * 0.0625)
             creature["stats"]["hp"] = max(0, creature["stats"]["hp"] - damage)
-            damage_statement = f"{creature['name']} took {damage} damage from burn!"
+            damage_statement = f"{creature['creature']['name']} took {damage} damage from burn!"
             creature["status_duration"][creature["status"].index(status)] -= 1
             # Remove burn if it has expired
             if creature["status_duration"][creature["status"].index(status)] == 0:
@@ -191,29 +198,38 @@ def apply_move(first_player, second_player, attacker, defender, move_name):
 
     # Damage Calculation for damaging moves (physical or special)
     if move["category"] in ["physical", "special"]:
-        # If the move is physical, uses the attacker's Attack stat and defender's Defence stat in the calculation.
-        if move["category"] == "physical":
-            damage = int(((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier)
-        else:  # If the move is special, uses the attacker's Special Attack stat and defender's Special Defence stat.
-            damage = int(((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier)
-        # Ensures that damage is at least 1 (no negative or zero damage)
-        damage = max(1, damage)
-        # Reduces the defender's HP by the calculated damage, but not below 0
-        defender["stats"]["hp"] = max(0, defender["stats"]["hp"] - damage)
-        # Prints a message indicating the move used and the damage dealt
-        print(f"{first_player} {attacker['creature']['name']} used {move_name}! It dealt {damage:.2f} damage to {second_player} {defender['creature']['name']}.")
+        if random.random() <= move["accuracy"]:
+            # If the move is physical, uses the attacker's Attack stat and defender's Defence stat in the calculation.
+            if move["category"] == "physical":
+                damage = int(((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier)
+            else:  # If the move is special, uses the attacker's Special Attack stat and defender's Special Defence stat.
+                damage = int(((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier)
+            # Ensures that damage is at least 1 (no negative or zero damage)
+            damage = max(1, damage)
+            # Reduces the defender's HP by the calculated damage, but not below 0
+            defender["stats"]["hp"] = max(0, defender["stats"]["hp"] - damage)
+            # Prints a message indicating the move used and the damage dealt
+            print(f"{first_player} {attacker['creature']['name']} used {move_name}! It dealt {damage} damage to {second_player} {defender['creature']['name']}.")
+            return (f"{first_player} {attacker['creature']['name']} used {move_name}! It dealt {damage:.2f} damage to {second_player} {defender['creature']['name']}.")
+        else:
+            # Prints a message indicating the move missed
+            print(f"{first_player} {attacker['creature']['name']} used {move_name}! But it missed!")
+            return (f"{first_player} {attacker['creature']['name']} used {move_name}! But it missed!")
 
     # Applying Status Effects
     if move["category"] == "status":
         terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
         status_success = status_moves_logic(attacker, defender, move, terrain_conditions)
-        print(f"{first_player} {attacker['creature']['name']} used {move_name}!")
         if status_success == "success":
-            print("It was successful!")
+            print(f"{first_player} {attacker['creature']['name']} used {move_name}! It was successful!")
+            return f"{first_player} {attacker['creature']['name']} used {move_name}! It was successful!"
         elif status_success == "missed":
-            print("But it missed!")
+            print(f"{first_player} {attacker['creature']['name']} used {move_name}! But it missed!")
+            return f"{first_player} {attacker['creature']['name']} used {move_name}! But it missed!"
         elif status_success == "no_effect":
-            print("But it had no effect!")
+            print(f"{first_player} {attacker['creature']['name']} used {move_name}! But it had no effect!")
+            return f"{first_player} {attacker['creature']['name']} used {move_name}! But it had no effect!"
         else:
             print("Something went wrong!")
+            return "Something went wrong!"
 

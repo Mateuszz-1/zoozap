@@ -21,8 +21,6 @@ def main():
                 response = input(":")
                 # Send the response back to the server
                 client_socket.sendall(response.encode())
-        else:
-            print("Unknown message received")
 
     client_socket.close()
 

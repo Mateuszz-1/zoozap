@@ -1,5 +1,6 @@
 import socket
 import msgpack
+import time
 import struct
 import random
 from code import logic
@@ -43,12 +44,12 @@ def main():
         if player1_choice == "attack":
             player1_move = player_move_choice(client1, active_creature1)
         elif player1_choice == "switch":
-            active_creature1 = player_switch(team1, active_creature1, client1, client2)
+            active_creature1 = player_switch(team1, active_creature1, client1, client2, "Player1")
         
         if player2_choice == "attack":
             player2_move = player_move_choice(client2, active_creature2)
         elif player2_choice == "switch":
-            active_creature2 = player_switch(team2, active_creature2, client1, client2)
+            active_creature2 = player_switch(team2, active_creature2, client1, client2, "Player2")
 
         if player1_choice == "attack" and player2_choice == "attack":
             player1_can_act, player2_can_act, player1_can_act_check, player2_can_act_check = both_attack(active_creature1, active_creature2, player1_move, player2_move, client1, client2)
@@ -67,18 +68,52 @@ def main():
         player2_can_act_check = locals().get('player2_can_act_check', None)
         any_status_removed(player1_can_act_check, player2_can_act_check, active_creature1, active_creature2, client1, client2)
 
-        active_creature1, active_creature2 = switch_fainted(active_creature1, active_creature2, team1, team2, client1, client2)
+        active_creature1 = switch_fainted(active_creature1, team1, client1, client2, "Player1")
+        active_creature2 = switch_fainted(active_creature2, team2, client2, client1, "Player2")
 
+    print("Team 1:", team1)
+    print("Team 2:", team2)
+    print("Team 1 count:", len(team1))
+    print("Team 2 count:", len(team2))
     if team1:
         print("Team 1 wins!")
+        send_message(client1, "You win!", "text")
+        send_message(client2, "You lose!", "text")
     else:
         print("Team 2 wins!")
+        send_message(client1, "You lose!", "text")
+        send_message(client2, "You win!", "text")
     close_game(client1, client2, server_socket)
 
-def establish_connection():
+def fix_socket():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('localhost', 12345))
-    server_socket.listen(2)
+    time.sleep(1)
+    server_socket.close()
+    time.sleep(1)
+
+def establish_connection():
+    retry_counter = 1
+    while True:
+        try:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.bind(('localhost', 12345))
+            server_socket.listen(2)
+            break
+        except OSError as e:
+            if e.errno == 48:
+                if retry_counter == 1:
+                    print("Server address is already in use. Trying again up to 10 times.")
+                if retry_counter <= 10:
+                    if retry_counter > 1:
+                        print(f"Address already in use. Retrying... ({retry_counter}/10)")
+                    fix_socket()
+                    retry_counter += 1
+                else:
+                    try_again = input("Server was unable to start. Would you like to continue trying? (y/n) ")
+                    if try_again.lower() == "y":
+                        retry_counter = 1
+                    else:
+                        exit()
 
     print("Server started, waiting for players...")
 
@@ -95,8 +130,8 @@ def establish_connection():
     return server_socket, client1, client2
 
 def populate_team(team):
+    pool = list(logic.creatures_dict.keys())
     for i in range(6):
-        pool = list(logic.creatures_dict.keys())
         creature_name = random.choice(pool)
         creature_data = logic.creatures_dict[creature_name]
         pool.remove(creature_name)
@@ -142,7 +177,7 @@ def player_move_choice(client, active_creature):
     player_move = client.recv(1024).decode()
     return player_move
 
-def player_switch(team, active_creature, player_client, opponent_client):
+def player_switch(team, active_creature, player_client, opponent_client, player_name):
     if team:
         for creature in team:
             if creature["creature"]["name"] == active_creature["creature"]["name"]:
@@ -156,6 +191,7 @@ def player_switch(team, active_creature, player_client, opponent_client):
             if creature["creature"]["name"] == switch_in_creature:
                 active_creature = creature
                 break
+        print(f"{player_name} has switched to {active_creature['creature']['name']}!")
         send_message(player_client, f"You have switched to {active_creature['creature']['name']}!", "text")
         send_message(opponent_client, f"Player1 switched to {active_creature['creature']['name']}!", "text")
     return active_creature
@@ -179,34 +215,46 @@ def both_attack(active_creature1, active_creature2, player1_move, player2_move, 
         player1_can_act_check = logic.can_act_check(active_creature1)
         player1_can_act = False if player1_can_act_check['return_statement'] == False else True # if the creature is unable to act
         if player1_can_act:
-            logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+            move_results = logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+            send_message(client1, move_results, "text")
+            send_message(client2, move_results, "text")
         if active_creature2['stats']['hp'] == 0:
+            print(f"Player2's {active_creature2['creature']['name']} has fainted!")
             send_message(client1, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
-            send_message(client2, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
+            send_message(client2, f"Your {active_creature2['creature']['name']} has fainted!", "text")
         else:
             player2_can_act_check = logic.can_act_check(active_creature2)
             player2_can_act = False if player2_can_act_check['return_statement'] == False else True # if the creature is unable to act
             if player2_can_act:
-                logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+                move_results = logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+                send_message(client1, move_results, "text")
+                send_message(client2, move_results, "text")
                 if active_creature1['stats']['hp'] == 0:
-                    send_message(client1, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
+                    print(f"Player1's {active_creature1['creature']['name']} has fainted!")
+                    send_message(client1, f"Your {active_creature1['creature']['name']} has fainted!", "text")
                     send_message(client2, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
     elif ((player2_first == True) or (random_turn == 2)):
         player2_can_act_check = logic.can_act_check(active_creature2)
         player2_can_act = False if player2_can_act_check['return_statement'] == False else True # if the creature is unable to act
         if player2_can_act:
-            logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+            move_results = logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+            send_message(client1, move_results, "text")
+            send_message(client2, move_results, "text")
         if active_creature1['stats']['hp'] == 0:
-            send_message(client1, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
+            print(f"Player1's {active_creature1['creature']['name']} has fainted!")
+            send_message(client1, f"Your {active_creature1['creature']['name']} has fainted!", "text")
             send_message(client2, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
         else:
             player1_can_act_check = logic.can_act_check(active_creature1)
             player1_can_act = False if player1_can_act_check['return_statement'] == False else True # if the creature is unable to act
             if player1_can_act:
-                logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+                move_results = logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+                send_message(client1, move_results, "text")
+                send_message(client2, move_results, "text")
                 if active_creature2['stats']['hp'] == 0:
+                    print(f"Player2's {active_creature2['creature']['name']} has fainted!")
                     send_message(client1, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
-                    send_message(client2, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
+                    send_message(client2, f"Your {active_creature2['creature']['name']} has fainted!", "text")
     return player1_can_act, player2_can_act, player1_can_act_check, player2_can_act_check
 
 def player1_attack(active_creature1, active_creature2, player1_move, client1, client2):
@@ -215,10 +263,13 @@ def player1_attack(active_creature1, active_creature2, player1_move, client1, cl
     if player1_can_act_check['return_statement'] == False: # if the creature is unable to act
         player1_can_act = False
     if player1_can_act:
-        logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+        move_results = logic.apply_move("Player1's", "Player2's", active_creature1, active_creature2, player1_move)
+        send_message(client1, move_results, "text")
+        send_message(client2, move_results, "text")
     if active_creature2['stats']['hp'] == 0:
+        print(f"Player2's {active_creature2['creature']['name']} has fainted!")
         send_message(client1, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
-        send_message(client2, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
+        send_message(client2, f"Your {active_creature2['creature']['name']} has fainted!", "text")
     return player1_can_act, player1_can_act_check
 
 def player2_attack(active_creature1, active_creature2, player2_move, client1, client2):
@@ -227,9 +278,12 @@ def player2_attack(active_creature1, active_creature2, player2_move, client1, cl
     if player2_can_act_check['return_statement'] == False: # if the creature is unable to act
         player2_can_act = False
     if player2_can_act:
-        logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+        move_results = logic.apply_move("Player2's", "Player1's", active_creature2, active_creature1, player2_move)
+        send_message(client1, move_results, "text")
+        send_message(client2, move_results, "text")
     if active_creature1['stats']['hp'] == 0:
-        send_message(client1, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
+        print(f"Player1's {active_creature1['creature']['name']} has fainted!")
+        send_message(client1, f"Your {active_creature1['creature']['name']} has fainted!", "text")
         send_message(client2, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
     return player2_can_act, player2_can_act_check
 
@@ -251,19 +305,23 @@ def did_creatures_burn(active_creature1, active_creature2, client1, client2):
     if active_creature1['stats']['hp'] != 0:
         player1_burn_check = logic.burn_check(active_creature1)
         if player1_burn_check['damage_statement'] != "":
+            print(f"Player1's {player1_burn_check['damage_statement']}")
             send_message(client1, f"Player1's {player1_burn_check['damage_statement']}", "text")
             send_message(client2, f"Player1's {player1_burn_check['damage_statement']}", "text")
             if active_creature1['stats']['hp'] == 0:
-                send_message(client1, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
+                print(f"Player1's {active_creature1['creature']['name']} has fainted!")
+                send_message(client1, f"Your {active_creature1['creature']['name']} has fainted!", "text")
                 send_message(client2, f"Player1's {active_creature1['creature']['name']} has fainted!", "text")
     if active_creature2['stats']['hp'] != 0:
         player2_burn_check = logic.burn_check(active_creature2)
         if player2_burn_check['damage_statement'] != "":
+            print(f"Player2's {player2_burn_check['damage_statement']}")
             send_message(client1, f"Player2's {player2_burn_check['damage_statement']}", "text")
-            send_message(client2, f"Player2's {player2_burn_check['damage_statement']}", "text")
+            send_message(client2, f"Your {player2_burn_check['damage_statement']}", "text")
             if active_creature2['stats']['hp'] == 0:
+                print(f"Player2's {active_creature2['creature']['name']} has fainted!")
                 send_message(client1, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
-                send_message(client2, f"Player2's {active_creature2['creature']['name']} has fainted!", "text")
+                send_message(client2, f"Your {active_creature2['creature']['name']} has fainted!", "text")
 
 def any_status_removed(player1_can_act_check, player2_can_act_check, active_creature1, active_creature2, client1, client2):
     if player1_can_act_check is not None:
@@ -275,40 +333,25 @@ def any_status_removed(player1_can_act_check, player2_can_act_check, active_crea
             send_message(client1, f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!", "text")
             send_message(client2, f"{player2_can_act_check['removed_status']} has been cured from Player2's {active_creature2['creature']['name']}!", "text")
 
-def switch_fainted(active_creature1, active_creature2, team1, team2, client1, client2):
-    if active_creature1['stats']['hp'] == 0:
-        team1.remove(active_creature1)
-        active_creature1 = None
-        if team1:
-            for creature in team1:
-                send_message(client1, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
-            team1_creature_names = get_team_creature_names(team1)
-            send_message(client1, team1_creature_names, "msgpack")
-            send_message(client1, "Which creature would you like to switch to?", "text")
-            player1_switch = client1.recv(1024).decode()
-            for creature in team1:
-                if creature["creature"]["name"] == player1_switch:
-                    active_creature1 = creature
+def switch_fainted(active_creature, team, player_client, opponent_client, player_name):
+    if active_creature['stats']['hp'] == 0:
+        team.remove(active_creature)
+        active_creature = None
+        if team:
+            for creature in team:
+                send_message(player_client, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
+            team_creature_names = get_team_creature_names(team)
+            send_message(player_client, team_creature_names, "msgpack")
+            send_message(player_client, "Which creature would you like to switch to?", "text")
+            player_switch = player_client.recv(1024).decode()
+            for creature in team:
+                if creature["creature"]["name"] == player_switch:
+                    active_creature = creature
                     break
-            send_message(client1, f"You have switched to {active_creature1['creature']['name']}!", "text")
-            send_message(client2, f"Player1 has switched to {active_creature1['creature']['name']}!", "text")
-    if active_creature2['stats']['hp'] == 0:
-        team2.remove(active_creature2)
-        active_creature2 = None
-        if team2:
-            for creature in team2:
-                send_message(client2, f"{creature['creature']['name']} | HP: {creature['stats']['hp']}/{creature['creature']['stats']['hp']}\n", "text")
-            team2_creature_names = get_team_creature_names(team2)
-            send_message(client2, team2_creature_names, "msgpack")
-            send_message(client2, "Which creature would you like to switch to?", "text")
-            player2_switch = client2.recv(1024).decode()
-            for creature in team2:
-                if creature["creature"]["name"] == player2_switch:
-                    active_creature2 = creature
-                    break
-            send_message(client1, f"Player2 has switched to {active_creature2['creature']['name']}!", "text")
-            send_message(client2, f"You have switched to {active_creature2['creature']['name']}!", "text")
-    return active_creature1, active_creature2
+            print(f"{player_name} has switched to {active_creature['creature']['name']}!")
+            send_message(player_client, f"You have switched to {active_creature['creature']['name']}!", "text")
+            send_message(opponent_client, f"Player1 has switched to {active_creature['creature']['name']}!", "text")
+    return active_creature
 
 def close_game(client1, client2, server_socket):
     # Keep the server running
@@ -317,6 +360,7 @@ def close_game(client1, client2, server_socket):
     client1.close()
     client2.close()
     server_socket.close()
+    time.sleep(1)
 
 def get_moves(creature):
     return creature["creature"]["moves"]
