@@ -2,10 +2,20 @@ import socket
 import struct
 
 def main():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('localhost', 12345))
+    port = 50500
+    while True:
+        if port > 50600:
+            print("No available ports")
+            exit()
+        try:
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.connect(('localhost', port))
+            break
+        except OSError as e:
+                if e.errno == 61:
+                    port += 1
 
-    print("Connected to the server.")
+    print(f"Connected to the server at port {port}.")
 
     while True:
         message_type, message = receive_message(client_socket)
