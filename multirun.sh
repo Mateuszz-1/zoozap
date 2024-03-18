@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 VENV_PATH="$DIR/env/bin/activate"
 
-for i in {1..250}
+for i in {1..200}
 do
 
 echo "Iteration $i"
