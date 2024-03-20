@@ -42,7 +42,8 @@ def main():
     }
     
     while team1 and team2:
-        attack_switch(client1, client2, active_creature1, active_creature2)
+        attack_switch(client1, active_creature1, active_creature2)
+        attack_switch(client2, active_creature2, active_creature1)
 
         player1_choice = client1.recv(1024).decode()
         player2_choice = client2.recv(1024).decode()
@@ -61,7 +62,7 @@ def main():
         if player2_choice == "attack":
             player2_move = player_move_choice(client2, active_creature2)
         elif player2_choice == "switch":
-            active_creature2, battle_log = player_switch(team2, active_creature2, client1, client2, "Player2", battle_log)
+            active_creature2, battle_log = player_switch(team2, active_creature2, client2, client1, "Player2", battle_log)
 
         if player1_choice == "attack" and player2_choice == "attack":
             player1_can_act, player2_can_act, player1_can_act_check, player2_can_act_check, battle_log = both_attack(active_creature1, active_creature2, player1_move, player2_move, client1, client2, battle_log)
@@ -103,12 +104,6 @@ def main():
     battle_log["winner_ending_health"] = calculate_total_health(team1) if team1 else calculate_total_health(team2)
     log_battle_info(battle_log)
     close_game(client1, client2, server_socket)
-
-def fix_socket():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    time.sleep(1)
-    server_socket.close()
-    time.sleep(1)
 
 def establish_connection():
     port = 50500
@@ -160,24 +155,16 @@ def setup_teams():
     active_creature2 = team2[0]
     return team1, team2, active_creature1, active_creature2
 
-def attack_switch(client1, client2, active_creature1, active_creature2):
-    send_message(client1, f"Your active creature is {active_creature1['creature']['name']}. Your available moves are:", "text")
-    for move in active_creature1["creature"]["moves"]:
+def attack_switch(player_client, player_active_creature, opponent_active_creature):
+    send_message(player_client, f"Your active creature is {player_active_creature['creature']['name']}. Your available moves are:", "text")
+    for move in player_active_creature["creature"]["moves"]:
         if move["category"] == "physical" or move["category"] == "special":
-            send_message(client1, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}", "text")
+            send_message(player_client, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}", "text")
         else:
-            send_message(client1, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}", "text")
-    send_message(client2, f"Your active creature is {active_creature2['creature']['name']}. Your available moves are:", "text")
-    for move in active_creature2["creature"]["moves"]:
-        if move["category"] == "physical" or move["category"] == "special":
-            send_message(client2, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Power: {move['power']} | Accuracy: {move['accuracy']}", "text")
-        else:
-            send_message(client2, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}", "text")
+            send_message(player_client, f"{move['name']} | Type: {move['type']} | Category: {move['category']} | Effect: {move['effect']}", "text")
     attack_or_switch = ["attack", "switch"]
-    send_message(client1, attack_or_switch, "msgpack")
-    send_message(client2, attack_or_switch, "msgpack")
-    send_message(client1, f"Your opponent's active creature is {active_creature2['creature']['name']}.\nWould you like to [attack] or [switch]?", "text")
-    send_message(client2, f"Your opponent's active creature is {active_creature1['creature']['name']}.\nWould you like to [attack] or [switch]?", "text")
+    send_message(player_client, attack_or_switch, "msgpack")
+    send_message(player_client, f"Your opponent's active creature is {opponent_active_creature['creature']['name']}.\nWould you like to [attack] or [switch]?", "text")
 
 def player_move_choice(client, active_creature):
     player_moves = get_moves(active_creature)

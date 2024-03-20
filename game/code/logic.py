@@ -1,6 +1,11 @@
 import random
 from .creatures import creatures_dict
 
+def damage_modifier():
+    multipliers = [1, 1.05, 0.95, 1.1]
+    probabilities = [0.95, 0.03, 0.01, 0.01]
+    return random.choices(multipliers, weights=probabilities, k=1)[0]
+
 def calculate_type_multiplier(move_type, defender):
     multiplier = 1.0
     if move_type in defender["creature"]["weakness"]:
@@ -9,7 +14,7 @@ def calculate_type_multiplier(move_type, defender):
         multiplier *= 0.5  # Half damage for resistances
     return multiplier
 
-def status_moves_logic(attacker, defender, move, terrain_conditions):
+def status_moves_logic(attacker, defender, move):
     if move["effect"] == "burn":
         # Fire type creatures are immune to burn
         if "fire" in defender["creature"]["type"]:
@@ -100,16 +105,6 @@ def status_moves_logic(attacker, defender, move, terrain_conditions):
             return "success"
         else:
             return "missed"
-    elif move["effect"] == "poison_terrain":
-        # Toxic spikes can be applied twice, any use afterwards does nothing
-        # Toxic spikes poison any creature that switches in on the defender's side
-        if terrain_conditions["toxic_spikes"] == False:
-            # 1 layer deals 12.5% of the defender's max HP each turn
-            terrain_conditions["toxic_spikes"] = True
-        else:
-            # 2 layers start dealing 6.25% of the defender's max HP each turn but increase by 6.25% each turn
-            terrain_conditions["super_toxic_spikes"] = True
-        return "success"
     elif move["effect"] == "raise_def":
         # Raise the attacker's Defence stat by 40%
         attacker["stats"]["def"] *= 1.4
@@ -201,9 +196,9 @@ def apply_move(first_player, second_player, attacker, defender, move_name):
         if random.random() <= move["accuracy"]:
             # If the move is physical, uses the attacker's Attack stat and defender's Defence stat in the calculation.
             if move["category"] == "physical":
-                damage = int(((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier)
+                damage = int((((attacker["stats"]["atk"] / defender["stats"]["def"]) * move["power"]) * type_multiplier) * damage_modifier())
             else:  # If the move is special, uses the attacker's Special Attack stat and defender's Special Defence stat.
-                damage = int(((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier)
+                damage = int((((attacker["stats"]["sp_atk"] / defender["stats"]["sp_def"]) * move["power"]) * type_multiplier) * damage_modifier())
             # Ensures that damage is at least 1 (no negative or zero damage)
             damage = max(1, damage)
             # Reduces the defender's HP by the calculated damage, but not below 0
@@ -218,8 +213,7 @@ def apply_move(first_player, second_player, attacker, defender, move_name):
 
     # Applying Status Effects
     if move["category"] == "status":
-        terrain_conditions = {"toxic_spikes": False, "super_toxic_spikes": False}
-        status_success = status_moves_logic(attacker, defender, move, terrain_conditions)
+        status_success = status_moves_logic(attacker, defender, move)
         if status_success == "success":
             print(f"{first_player} {attacker['creature']['name']} used {move_name}! It was successful!")
             return f"{first_player} {attacker['creature']['name']} used {move_name}! It was successful!"

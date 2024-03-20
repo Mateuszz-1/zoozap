@@ -41,7 +41,6 @@ all_moves = [
     {"name": "Mirror Shine", "type": "psychic", "category": "status", "effect": "reflect_effect", "probability": 1},
     {"name": "Shadow Hold", "type": "dark", "category": "status", "effect": "prevent_escape", "probability": 1},
     {"name": "Frost Chill", "type": "ice", "category": "status", "effect": "freeze", "probability": 0.2},
-    {"name": "Toxic Spikes", "type": "poison", "category": "status", "effect": "poison_terrain", "probability": 1},
     {"name": "Steel Wall", "type": "steel", "category": "status", "effect": "raise_def", "probability": 1},
     {"name": "Fairy Dust", "type": "fairy", "category": "status", "effect": "heal", "probability": 1},
     {"name": "Stun Spore", "type": "grass", "category": "status", "effect": "paralyse", "probability": 0.75},
